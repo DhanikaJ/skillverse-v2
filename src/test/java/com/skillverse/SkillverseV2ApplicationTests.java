@@ -1,4 +1,4 @@
-package com.skillverse.skillversev2;
+package com.skillverse;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,3 +11,4 @@ class SkillverseV2ApplicationTests {
     }
 
 }
+
