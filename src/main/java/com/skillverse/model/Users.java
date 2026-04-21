@@ -3,6 +3,7 @@ package com.skillverse.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -22,6 +23,8 @@ public class Users {
     private Integer city_id;
     private String photo;
     private Integer gender_id;
+    @OneToMany(mappedBy = "users")
+    private List<Course> course;
 
     public Users() {
     }
