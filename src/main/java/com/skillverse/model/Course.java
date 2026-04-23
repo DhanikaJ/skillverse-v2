@@ -3,6 +3,7 @@ package com.skillverse.model;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -10,13 +11,13 @@ import java.util.Objects;
 public class Course {
 
     @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
     private String description;
     private String pricelevel;
     private String difficulty;
-   // private Category category;
+    // private Category category;
     private double price;
     private String thumbnail;
     //private Status status;
@@ -25,6 +26,8 @@ public class Course {
     @JoinColumn(name = "users_id")
     private Users users;
     private Date created_at;
+    @OneToMany(mappedBy = "course")
+    private List<Enrollment> enrollments;
 
     public Course() {
     }
