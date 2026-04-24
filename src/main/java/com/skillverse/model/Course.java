@@ -1,7 +1,9 @@
 package com.skillverse.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -26,8 +28,11 @@ public class Course {
     @JoinColumn(name = "users_id")
     private Users users;
     private Date created_at;
-    @OneToMany(mappedBy = "course")
-    private List<Enrollment> enrollments;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Enrollment> enrollments = new ArrayList<>();
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"course"})
+    private List<Lesson> lessons = new ArrayList<>();
 
     public Course() {
     }
@@ -40,7 +45,7 @@ public class Course {
         this.difficulty = difficulty;
         this.price = price;
         this.thumbnail = thumbnail;
-        this.users = users;
+        this.users = user;
         this.created_at = created_at;
     }
 
@@ -116,11 +121,29 @@ public class Course {
         this.created_at = created_at;
     }
 
+    public List<Lesson> getLessons() {
+        return lessons;
+    }
+
+    public void setLessons(List<Lesson> lessons) {
+        this.lessons = lessons;
+    }
+
+    public void addLesson(Lesson lesson) {
+        this.lessons.add(lesson);
+        lesson.setCourse(this);
+    }
+
+    public void removeLesson(Lesson lesson) {
+        this.lessons.remove(lesson);
+        lesson.setCourse(null);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Course course = (Course) o;
-        return id == course.id && Double.compare(price, course.price) == 0 && Objects.equals(title, course.title) && Objects.equals(description, course.description) && Objects.equals(pricelevel, course.pricelevel) && Objects.equals(difficulty, course.difficulty) && Objects.equals(thumbnail, course.thumbnail) && Objects.equals(users, course.users) && Objects.equals(created_at, course.created_at);
+        return Objects.equals(id, course.id) && Double.compare(price, course.price) == 0 && Objects.equals(title, course.title) && Objects.equals(description, course.description) && Objects.equals(pricelevel, course.pricelevel) && Objects.equals(difficulty, course.difficulty) && Objects.equals(thumbnail, course.thumbnail) && Objects.equals(users, course.users) && Objects.equals(created_at, course.created_at);
     }
 
     @Override
