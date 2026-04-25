@@ -1,5 +1,8 @@
 package com.skillverse.service;
 
+import com.skillverse.dto.UserDTO;
+import com.skillverse.exception.ResourceNotFoundException;
+import com.skillverse.mapper.EntityMapper;
 import com.skillverse.model.Users;
 import com.skillverse.repository.UsersRepository;
 import org.springframework.stereotype.Service;
@@ -9,21 +12,24 @@ import java.util.List;
 @Service
 public class UsersService {
     private  final  UsersRepository usersRepository;
+    private final EntityMapper entityMapper;
 
-    UsersService(UsersRepository usersRepository) {
+    public UsersService(UsersRepository usersRepository, EntityMapper entityMapper) {
         this.usersRepository = usersRepository;
+        this.entityMapper = entityMapper;
     }
 
     public  void insertUser(Users users) {
         usersRepository.save(users);
     }
 
-    public List<Users> getUsers() {
-        return usersRepository.findAll();
+    public List<UserDTO> getUsers() {
+        return entityMapper.toUserDTOList(usersRepository.findAll());
     }
 
-    public Users getUsersById(Integer id) {
-        return usersRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException(id + "User not found"));
+    public UserDTO getUsersById(Integer id) {
+        Users user = usersRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+        return entityMapper.toUserDTO(user);
     }
 }

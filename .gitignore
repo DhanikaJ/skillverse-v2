@@ -11,6 +11,9 @@ PAYMENT_API_GUIDE.md
 QUICK_START.md
 README_PAYHERE.md
 Skillverse_PayHere_Postman_Collection.json
+ERROR_HANDLING_TESTS.json
+DTO_IMPLEMENTATION_GUIDE.md
+ENROLLMENT_DTO_FIX.md
 
 ### STS ###
 .apt_generated

@@ -1,5 +1,6 @@
 package com.skillverse.controller;
 
+import com.skillverse.dto.UserDTO;
 import com.skillverse.model.Users;
 import com.skillverse.service.UsersService;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +18,12 @@ public class UsersController {
     }
 
     @GetMapping
-    public List<Users> getUsers() {
+    public List<UserDTO> getUsers() {
         return usersService.getUsers();
     }
 
     @GetMapping({"{id}"})
-    public Users getUsersById(@PathVariable Integer id) {
+    public UserDTO getUsersById(@PathVariable Integer id) {
         return usersService.getUsersById(id);
     }
 

@@ -1,7 +1,7 @@
 package com.skillverse.controller;
 
 import com.skillverse.dto.CourseStatsResponse;
-import com.skillverse.model.Users;
+import com.skillverse.dto.UserDTO;
 import com.skillverse.service.AdminService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -17,7 +17,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public List<Users> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         return adminService.getAllUsers();
     }
 

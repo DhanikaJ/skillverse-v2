@@ -1,6 +1,6 @@
 package com.skillverse.controller;
 
-import com.skillverse.model.Enrollment;
+import com.skillverse.dto.EnrollmentDTO;
 import com.skillverse.service.EnrollmentService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -16,7 +16,7 @@ public class EnrollmentController {
     }
 
     @PostMapping("/enroll/{studentId}/{courseId}")
-    public Enrollment enroll(
+    public EnrollmentDTO enroll(
             @PathVariable Integer studentId,
             @PathVariable Integer courseId
     ) {
@@ -24,7 +24,7 @@ public class EnrollmentController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<Enrollment> getUserEnrollments(@PathVariable Integer userId) {
+    public List<EnrollmentDTO> getUserEnrollments(@PathVariable Integer userId) {
         return enrollmentService.getEnrollmentsByUserId(userId);
     }
 }

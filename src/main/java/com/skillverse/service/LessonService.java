@@ -1,5 +1,6 @@
 package com.skillverse.service;
 
+import com.skillverse.exception.ResourceNotFoundException;
 import com.skillverse.model.Course;
 import com.skillverse.model.Lesson;
 import com.skillverse.repository.CourseRepository;
@@ -33,7 +34,7 @@ public class LessonService {
 
     public Lesson getLesson(Integer courseId, Integer lessonId) {
         return lessonRepository.findByIdAndCourse_Id(lessonId, courseId)
-                .orElseThrow(() -> new IllegalStateException("Lesson not found: " + lessonId + " for course: " + courseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with ID: " + lessonId + " for course: " + courseId));
     }
 
     public Lesson updateLesson(Integer courseId, Integer lessonId, Lesson lessonRequest) {
@@ -54,7 +55,7 @@ public class LessonService {
 
     private Course getCourse(Integer courseId) {
         return courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalStateException("Course not found: " + courseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with ID: " + courseId));
     }
 }
 

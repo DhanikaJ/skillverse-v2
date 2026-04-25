@@ -1,5 +1,6 @@
 package com.skillverse.controller;
 
+import com.skillverse.dto.CourseDTO;
 import com.skillverse.model.Course;
 import com.skillverse.service.CourseService;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class CourseController {
     }
 
     @GetMapping
-    public List<Course> getCourses(){
+    public List<CourseDTO> getCourses(){
         return courseService.getCourses();
     }
 
@@ -26,7 +27,7 @@ public class CourseController {
     }
 
     @GetMapping("{id}")
-    public Course getCourseById(@PathVariable Integer id){
+    public CourseDTO getCourseById(@PathVariable Integer id){
         return courseService.getCoursesById(id);
     }
 
