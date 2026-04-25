@@ -7,6 +7,7 @@ import com.skillverse.repository.CourseRepository;
 import com.skillverse.repository.EnrollmentRepository;
 import com.skillverse.repository.UsersRepository;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class EnrollmentService {
@@ -39,9 +40,14 @@ public class EnrollmentService {
         Enrollment enrollment = new Enrollment();
         enrollment.setUser(user);
         enrollment.setCourse(course);
-        enrollment.setProgress(0.0); // default progress
-        // enrollment.setStatus(...); // set if you already manage enrollment statuses
+        enrollment.setProgress(0.0);
 
         return enrollmentRepository.save(enrollment);
+    }
+
+    public List<Enrollment> getEnrollmentsByUserId(Integer userId) {
+        usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found: " + userId));
+        return enrollmentRepository.findByUser_Id(userId);
     }
 }

@@ -3,6 +3,14 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+DELIVERY_SUMMARY.md
+FILE_INVENTORY.md
+FIXED_TEST_GUIDE.md
+PAYHERE_IMPLEMENTATION_COMPLETE.md
+PAYMENT_API_GUIDE.md
+QUICK_START.md
+README_PAYHERE.md
+Skillverse_PayHere_Postman_Collection.json
 
 ### STS ###
 .apt_generated

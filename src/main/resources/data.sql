@@ -1,3 +1,6 @@
+-- This file is for cleaning up orphaned FK values only
+-- Data initialization should be done via a separate mechanism
+
 -- Clean orphaned FK values before Hibernate applies/updates constraints.
 UPDATE users u
 SET city_id = NULL

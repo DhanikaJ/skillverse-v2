@@ -1,0 +1,11 @@
+package com.skillverse.repository;
+
+import com.skillverse.model.OrderItem;
+import com.skillverse.model.Orders;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
+    List<OrderItem> findByOrders(Orders orders);
+}
+
