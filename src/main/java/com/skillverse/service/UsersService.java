@@ -5,13 +5,15 @@ import com.skillverse.exception.ResourceNotFoundException;
 import com.skillverse.mapper.EntityMapper;
 import com.skillverse.model.Users;
 import com.skillverse.repository.UsersRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class UsersService {
-    private  final  UsersRepository usersRepository;
+    private final UsersRepository usersRepository;
     private final EntityMapper entityMapper;
 
     public UsersService(UsersRepository usersRepository, EntityMapper entityMapper) {
@@ -19,11 +21,16 @@ public class UsersService {
         this.entityMapper = entityMapper;
     }
 
-    public  void insertUser(Users users) {
+    public void insertUser(Users users) {
         usersRepository.save(users);
     }
 
-    public List<UserDTO> getUsers() {
+    public Page<UserDTO> getUsers(Pageable pageable) {
+        Page<Users> users = usersRepository.findAll(pageable);
+        return users.map(entityMapper::toUserDTO);
+    }
+
+    public List<UserDTO> getAllUsers() {
         return entityMapper.toUserDTOList(usersRepository.findAll());
     }
 

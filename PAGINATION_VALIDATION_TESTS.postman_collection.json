@@ -1,0 +1,333 @@
+{
+  "info": {
+    "_postman_id": "skillverse-pagination-validation",
+    "name": "Skillverse Pagination & Validation Tests",
+    "description": "Tests for pagination and input validation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Pagination Tests",
+      "item": [
+        {
+          "name": "✅ GET Users - Page 1 (size=10)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users?page=0&size=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
+              ]
+            },
+            "description": "Get first page of users (10 per page)"
+          }
+        },
+        {
+          "name": "✅ GET Users - Page 2 (size=10)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users?page=1&size=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "size", "value": "10"}
+              ]
+            },
+            "description": "Get second page of users"
+          }
+        },
+        {
+          "name": "✅ GET Courses - Page 1 (size=5)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/courses?page=0&size=5",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "courses"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "5"}
+              ]
+            },
+            "description": "Get first page of courses (5 per page)"
+          }
+        },
+        {
+          "name": "✅ GET Courses - Large Page Size (size=50)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/v1/courses?page=0&size=50",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "courses"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "50"}
+              ]
+            },
+            "description": "Get first page with 50 items per page"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validation Tests - Users",
+      "item": [
+        {
+          "name": "✅ POST User - Valid Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fname\": \"John\",\n  \"lname\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            },
+            "description": "Create user with valid data - Expected: 200 OK"
+          }
+        },
+        {
+          "name": "❌ POST User - fname Too Short",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fname\": \"J\",\n  \"lname\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            },
+            "description": "Expected: 400 Bad Request - fname must be between 2-100 chars"
+          }
+        },
+        {
+          "name": "❌ POST User - Invalid Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fname\": \"John\",\n  \"lname\": \"Doe\",\n  \"email\": \"invalid-email\",\n  \"phone\": \"123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            },
+            "description": "Expected: 400 Bad Request - Email should be valid"
+          }
+        },
+        {
+          "name": "❌ POST User - Phone Too Long",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fname\": \"John\",\n  \"lname\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"123456789012345678901\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            },
+            "description": "Expected: 400 Bad Request - phone must not exceed 20 characters"
+          }
+        },
+        {
+          "name": "❌ POST User - Missing fname",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fname\": \"\",\n  \"lname\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "users"]
+            },
+            "description": "Expected: 400 Bad Request - First name is required"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validation Tests - Courses",
+      "item": [
+        {
+          "name": "✅ POST Course - Valid Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced Java Programming\",\n  \"description\": \"Learn advanced Java concepts and best practices for professional development\",\n  \"pricelevel\": \"advanced\",\n  \"difficulty\": \"hard\",\n  \"price\": 99.99,\n  \"thumbnail\": \"https://example.com/image.jpg\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/courses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "courses"]
+            },
+            "description": "Create course with valid data - Expected: 200 OK"
+          }
+        },
+        {
+          "name": "❌ POST Course - Title Too Short",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"AB\",\n  \"description\": \"Learn advanced Java concepts and best practices\",\n  \"price\": 99.99\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/courses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "courses"]
+            },
+            "description": "Expected: 400 Bad Request - title must be between 3-200 characters"
+          }
+        },
+        {
+          "name": "❌ POST Course - Description Too Short",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced Java\",\n  \"description\": \"Short\",\n  \"price\": 99.99\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/courses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "courses"]
+            },
+            "description": "Expected: 400 Bad Request - description must be between 10-2000 characters"
+          }
+        },
+        {
+          "name": "❌ POST Course - Negative Price",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced Java\",\n  \"description\": \"Learn advanced Java concepts and best practices\",\n  \"price\": -50\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/courses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "courses"]
+            },
+            "description": "Expected: 400 Bad Request - price must be >= 0"
+          }
+        },
+        {
+          "name": "❌ POST Course - Price Too High",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Advanced Java\",\n  \"description\": \"Learn advanced Java concepts and best practices\",\n  \"price\": 9999999.99\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/courses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "courses"]
+            },
+            "description": "Expected: 400 Bad Request - price must not exceed 999999.99"
+          }
+        },
+        {
+          "name": "❌ POST Course - Missing Required Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"description\": \"\",\n  \"price\": -100\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/courses",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "courses"]
+            },
+            "description": "Expected: 400 Bad Request with multiple validation errors"
+          }
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,15 +1,33 @@
 package com.skillverse.dto;
 
+import jakarta.validation.constraints.*;
 import java.util.Date;
 
 public class CourseDTO {
     private Integer id;
+
+    @NotBlank(message = "Course title is required")
+    @Size(min = 3, max = 200, message = "Title must be between 3 and 200 characters")
     private String title;
+
+    @NotBlank(message = "Description is required")
+    @Size(min = 10, max = 2000, message = "Description must be between 10 and 2000 characters")
     private String description;
+
+    @Size(max = 50, message = "Price level must not exceed 50 characters")
     private String pricelevel;
+
+    @Size(max = 50, message = "Difficulty must not exceed 50 characters")
     private String difficulty;
+
+    @NotNull(message = "Price is required")
+    @DecimalMin(value = "0.0", message = "Price must be greater than or equal to 0")
+    @DecimalMax(value = "999999.99", message = "Price must not exceed 999999.99")
     private double price;
+
+    @Size(max = 500, message = "Thumbnail URL must not exceed 500 characters")
     private String thumbnail;
+
     private Date created_at;
 
     public CourseDTO() {
