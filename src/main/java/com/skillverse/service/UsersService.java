@@ -5,6 +5,8 @@ import com.skillverse.exception.ResourceNotFoundException;
 import com.skillverse.mapper.EntityMapper;
 import com.skillverse.model.Users;
 import com.skillverse.repository.UsersRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,11 @@ public class UsersService {
 
     public List<UserDTO> getUsers() {
         return entityMapper.toUserDTOList(usersRepository.findAll());
+    }
+
+    public Page<UserDTO> getUsersWithPagination(Pageable pageable) {
+        return usersRepository.findAll(pageable)
+                .map(entityMapper::toUserDTO);
     }
 
     public UserDTO getUsersById(Integer id) {

@@ -5,6 +5,9 @@ import com.skillverse.dto.UserRequestDTO;
 import com.skillverse.model.Users;
 import com.skillverse.service.UsersService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +23,11 @@ public class UsersController {
     }
 
     @GetMapping
-    public List<UserDTO> getUsers() {
-        return usersService.getUsers();
+    public Page<UserDTO> getUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return usersService.getUsersWithPagination(pageable);
     }
 
     @GetMapping({"{id}"})

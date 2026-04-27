@@ -5,6 +5,8 @@ import com.skillverse.exception.ResourceNotFoundException;
 import com.skillverse.mapper.EntityMapper;
 import com.skillverse.model.Course;
 import com.skillverse.repository.CourseRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,11 @@ public class CourseService {
 
     public List<CourseDTO> getCourses() {
         return entityMapper.toCourseDTOList(courseRepository.findAll());
+    }
+
+    public Page<CourseDTO> getCoursesWithPagination(Pageable pageable) {
+        return courseRepository.findAll(pageable)
+                .map(entityMapper::toCourseDTO);
     }
 
     public void insertCourse(Course course) {

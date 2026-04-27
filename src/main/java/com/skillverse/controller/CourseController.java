@@ -5,6 +5,9 @@ import com.skillverse.dto.CourseRequestDTO;
 import com.skillverse.model.Course;
 import com.skillverse.service.CourseService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +22,11 @@ public class CourseController {
     }
 
     @GetMapping
-    public List<CourseDTO> getCourses(){
-        return courseService.getCourses();
+    public Page<CourseDTO> getCourses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return courseService.getCoursesWithPagination(pageable);
     }
 
     @PostMapping
