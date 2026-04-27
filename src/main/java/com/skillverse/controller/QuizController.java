@@ -3,6 +3,7 @@ package com.skillverse.controller;
 import com.skillverse.model.Quiz;
 import com.skillverse.model.QuizQuestion;
 import com.skillverse.service.QuizService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class QuizController {
     }
 
     @PostMapping
-    public Quiz createQuiz(@RequestBody CreateQuizRequest request) {
+    public Quiz createQuiz(@Valid @RequestBody CreateQuizRequest request) {
         return quizService.createQuiz(request.getCourseId(), request.getTitle());
     }
 
@@ -28,7 +29,12 @@ public class QuizController {
     }
 
     public static class CreateQuizRequest {
+        @jakarta.validation.constraints.NotNull(message = "Course ID cannot be null")
+        @jakarta.validation.constraints.Positive(message = "Course ID must be a positive number")
         private Integer courseId;
+        
+        @jakarta.validation.constraints.NotBlank(message = "Title cannot be blank")
+        @jakarta.validation.constraints.Size(min = 3, max = 100, message = "Title must be between 3 and 100 characters")
         private String title;
 
         public Integer getCourseId() {

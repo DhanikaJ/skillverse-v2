@@ -1,15 +1,28 @@
 package com.skillverse.dto;
 
+import jakarta.validation.constraints.*;
 import java.util.Date;
 
 public class EnrollmentDTO {
     private Integer id;
+    
+    @NotNull(message = "User ID cannot be null")
+    @Positive(message = "User ID must be a positive number")
     private Integer userId;
+    
     private String userName;
+    
+    @NotNull(message = "Course ID cannot be null")
+    @Positive(message = "Course ID must be a positive number")
     private Integer courseId;
+    
     private String courseTitle;
     private Date enrolled_at;
+    
+    @DecimalMin(value = "0.0", message = "Progress cannot be negative")
+    @DecimalMax(value = "100.0", message = "Progress cannot exceed 100")
     private double progress;
+    
     private String statusType;
 
     public EnrollmentDTO() {

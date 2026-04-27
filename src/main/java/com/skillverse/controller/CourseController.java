@@ -1,8 +1,10 @@
 package com.skillverse.controller;
 
 import com.skillverse.dto.CourseDTO;
+import com.skillverse.dto.CourseRequestDTO;
 import com.skillverse.model.Course;
 import com.skillverse.service.CourseService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +24,14 @@ public class CourseController {
     }
 
     @PostMapping
-    public void addNewCourse(@RequestBody Course course){
+    public void addNewCourse(@Valid @RequestBody CourseRequestDTO courseRequestDTO){
+        Course course = new Course();
+        course.setTitle(courseRequestDTO.getTitle());
+        course.setDescription(courseRequestDTO.getDescription());
+        course.setPricelevel(courseRequestDTO.getPricelevel());
+        course.setDifficulty(courseRequestDTO.getDifficulty());
+        course.setPrice(courseRequestDTO.getPrice());
+        course.setThumbnail(courseRequestDTO.getThumbnail());
         courseService.insertCourse(course);
     }
 

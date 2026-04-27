@@ -1,8 +1,10 @@
 package com.skillverse.controller;
 
 import com.skillverse.dto.UserDTO;
+import com.skillverse.dto.UserRequestDTO;
 import com.skillverse.model.Users;
 import com.skillverse.service.UsersService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +30,11 @@ public class UsersController {
     }
 
     @PostMapping
-    public void  addNewUser(@RequestBody  Users users){
-        usersService.insertUser(users);
+    public void addNewUser(@Valid @RequestBody UserRequestDTO userRequestDTO){
+        Users user = new Users();
+        user.setFname(userRequestDTO.getFname());
+        user.setLname(userRequestDTO.getLname());
+        user.setEmail(userRequestDTO.getEmail());
+        usersService.insertUser(user);
     }
 }

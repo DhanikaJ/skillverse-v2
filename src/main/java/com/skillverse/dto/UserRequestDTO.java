@@ -1,10 +1,8 @@
 package com.skillverse.dto;
 
 import jakarta.validation.constraints.*;
-import java.util.Date;
 
-public class UserDTO {
-    private Integer id;
+public class UserRequestDTO {
 
     @NotBlank(message = "First name cannot be blank")
     @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
@@ -18,28 +16,13 @@ public class UserDTO {
     @Email(message = "Email should be valid")
     private String email;
 
-    private String phone;
-
-    private Date created_at;
-
-    public UserDTO() {
+    public UserRequestDTO() {
     }
 
-    public UserDTO(Integer id, String fname, String lname, String email, String phone, Date created_at) {
-        this.id = id;
+    public UserRequestDTO(String fname, String lname, String email) {
         this.fname = fname;
         this.lname = lname;
         this.email = email;
-        this.phone = phone;
-        this.created_at = created_at;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getFname() {
@@ -64,22 +47,6 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public Date getCreated_at() {
-        return created_at;
-    }
-
-    public void setCreated_at(Date created_at) {
-        this.created_at = created_at;
     }
 }
 
