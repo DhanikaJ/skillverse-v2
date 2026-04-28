@@ -1,4 +1,4 @@
-# SkillVerse
+# SkillVerse 2.0
 
 <p align="center">
   <b>RESTful backend for managing users, courses, and enrollments</b><br/>
