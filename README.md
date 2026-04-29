@@ -16,7 +16,7 @@
 ---
 
 ## 🚀 Overview
-SkillVerse is a RESTful backend that manages **users, courses, and enrollments** with a focus on **clean API design**, **normalized data modeling**, and **layered architecture**.  
+SkillVerse is a RESTful backend that manages **users, courses, and enrollments** featuring interactive API documentation via Swagger UI, **normalized data modeling**, and **layered architecture**.  
 It demonstrates production patterns such as **idempotent endpoints**, **validation-ready DTOs**, and **clear separation of concerns**.
 
 ---
@@ -53,6 +53,14 @@ PostgreSQL Database
 - REST conventions — resource-based URLs, proper HTTP methods
 - Persistence — JPA/Hibernate with PostgreSQL
 - Extensible — ready for validation, pagination, and auth
+- Interactive API documentation using Swagger UI
+
+# 📖 API Documentation
+- Interactive API documentation is available via Swagger UI:
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+- You can explore endpoints, view request/response schemas, and execute API calls directly from the browser.
 
 # 🔌 API (sample)
 ```text
@@ -116,6 +124,12 @@ spring.jpa.show-sql=true
 
 Use Postman or curl with the endpoints above.
 
+### 5. Access API Documentation
+- Open Swagger UI:
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
 # 🖼️ Screenshots
 
 <b>Postman<b/>
@@ -128,6 +142,9 @@ Use Postman or curl with the endpoints above.
 
 <img alt="Postgre tables" src="docs/db-tables.png">
 <img alt="Postgre Course" src="docs/db-courses.png">
+
+### Swagger UI
+![Swagger UI](docs/swagger.png)
 
 # 🗂️ Project Structure
 ```text
