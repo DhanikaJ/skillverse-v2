@@ -4,12 +4,14 @@ import com.skillverse.model.Quiz;
 import com.skillverse.model.QuizQuestion;
 import com.skillverse.service.QuizService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/quizzes")
+@RequestMapping("/api/v1/quizzes")
+@Tag(name = "Quizzes", description = "Quiz management endpoints")
 public class QuizController {
 
     private final QuizService quizService;

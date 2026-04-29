@@ -3,6 +3,7 @@ package com.skillverse.controller;
 import com.skillverse.model.Orders;
 import com.skillverse.model.OrderItem;
 import com.skillverse.service.OrdersService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/orders")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
+@Tag(name = "Orders", description = "Order management endpoints")
 public class OrdersController {
 
     @Autowired

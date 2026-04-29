@@ -1,6 +1,7 @@
 package com.skillverse.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -32,8 +33,10 @@ public class Users {
     @JoinColumn(name = "gender_id")
     private Gender gender;
     @OneToMany(mappedBy = "users")
+    @JsonIgnore
     private List<Course> course;
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Enrollment> enrollments;
 
     public Users() {

@@ -5,6 +5,7 @@ import com.skillverse.dto.CourseRequestDTO;
 import com.skillverse.model.Course;
 import com.skillverse.service.CourseService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/courses")
+@RequestMapping("/api/v1/courses")
+@Tag(name = "Courses", description = "Course management endpoints")
 public class CourseController {
     private final CourseService courseService;
 
@@ -41,7 +43,7 @@ public class CourseController {
         courseService.insertCourse(course);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public CourseDTO getCourseById(@PathVariable Integer id){
         return courseService.getCoursesById(id);
     }

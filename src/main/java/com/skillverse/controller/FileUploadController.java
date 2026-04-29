@@ -1,6 +1,7 @@
 package com.skillverse.controller;
 
 import com.skillverse.service.FileUploadService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "File Upload", description = "File upload endpoints")
 public class FileUploadController {
 
     private final FileUploadService fileUploadService;

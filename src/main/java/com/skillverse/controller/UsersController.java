@@ -5,6 +5,7 @@ import com.skillverse.dto.UserRequestDTO;
 import com.skillverse.model.Users;
 import com.skillverse.service.UsersService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/users")
+@RequestMapping("/api/v1/users")
+@Tag(name = "Users", description = "User management endpoints")
 public class UsersController {
 
     private final UsersService usersService;
@@ -30,7 +32,7 @@ public class UsersController {
         return usersService.getUsersWithPagination(pageable);
     }
 
-    @GetMapping({"{id}"})
+    @GetMapping("/{id}")
     public UserDTO getUsersById(@PathVariable Integer id) {
         return usersService.getUsersById(id);
     }

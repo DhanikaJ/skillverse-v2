@@ -3,6 +3,7 @@ package com.skillverse.controller;
 import com.skillverse.model.Payment;
 import com.skillverse.service.PaymentService;
 import com.skillverse.service.OrdersService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/payments")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
+@Tag(name = "Payments", description = "Payment processing endpoints")
 public class PaymentController {
 
     @Autowired

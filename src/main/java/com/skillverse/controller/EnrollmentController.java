@@ -2,11 +2,13 @@ package com.skillverse.controller;
 
 import com.skillverse.dto.EnrollmentDTO;
 import com.skillverse.service.EnrollmentService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/enrollments")
+@Tag(name = "Enrollments", description = "Enrollment management endpoints")
 public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
