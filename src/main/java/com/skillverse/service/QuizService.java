@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service class for managing Quiz operations.
+ * Provides functionality for creating quizzes and retrieving quiz questions.
+ */
 @Service
 public class QuizService {
 
@@ -23,9 +27,17 @@ public class QuizService {
         this.courseRepository = courseRepository;
     }
 
+    /**
+     * Creates a new quiz for a course.
+     *
+     * @param courseId the ID of the course
+     * @param title the title of the quiz
+     * @return the created Quiz entity
+     * @throws IllegalStateException if the course is not found
+     */
     public Quiz createQuiz(Integer courseId, String title) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalStateException("Course not found: " + courseId));
+                .orElseThrow(() -> new IllegalStateException("Course not found with ID: " + courseId));
 
         Quiz quiz = new Quiz();
         quiz.setCourse(course);
@@ -34,9 +46,16 @@ public class QuizService {
         return quizRepository.save(quiz);
     }
 
+    /**
+     * Retrieves all questions for a quiz, ordered by ID.
+     *
+     * @param quizId the ID of the quiz
+     * @return a list of QuizQuestion entities
+     * @throws IllegalStateException if the quiz is not found
+     */
     public List<QuizQuestion> getQuestionsByQuizId(Integer quizId) {
         quizRepository.findById(quizId)
-                .orElseThrow(() -> new IllegalStateException("Quiz not found: " + quizId));
+                .orElseThrow(() -> new IllegalStateException("Quiz not found with ID: " + quizId));
 
         return quizQuestionRepository.findByQuiz_IdOrderByIdAsc(quizId);
     }

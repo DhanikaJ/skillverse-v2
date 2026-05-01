@@ -9,6 +9,10 @@ import com.skillverse.repository.UsersRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+/**
+ * Service class for administrative operations.
+ * Provides functionality for managing users and retrieving platform statistics.
+ */
 @Service
 public class AdminService {
 
@@ -29,10 +33,20 @@ public class AdminService {
         this.entityMapper = entityMapper;
     }
 
+    /**
+     * Retrieves all users in the system.
+     *
+     * @return a list of all UserDTO objects
+     */
     public List<UserDTO> getAllUsers() {
         return entityMapper.toUserDTOList(usersRepository.findAll());
     }
 
+    /**
+     * Retrieves course statistics including total courses and enrollments.
+     *
+     * @return a CourseStatsResponse containing platform statistics
+     */
     public CourseStatsResponse getCourseStats() {
         long totalCourses = courseRepository.count();
         long totalEnrollments = enrollmentRepository.count();

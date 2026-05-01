@@ -9,6 +9,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Service class for managing file uploads to Cloudinary.
+ * Provides functionality for uploading files to cloud storage.
+ */
 @Service
 public class FileUploadService {
 
@@ -26,6 +30,15 @@ public class FileUploadService {
         ));
     }
 
+    /**
+     * Uploads a file to Cloudinary cloud storage.
+     *
+     * @param file the file to upload
+     * @return the secure URL of the uploaded file
+     * @throws IllegalArgumentException if the file is empty
+     * @throws RuntimeException if the upload fails
+     * @throws IOException if there is an I/O error
+     */
     public String uploadFile(MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
