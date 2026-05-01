@@ -6,6 +6,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Entity class representing an e-commerce order.
+ * Contains relationships to Users (one-to-many) and OrderItems (one-to-many).
+ */
 @Entity
 @Table(name = "orders")
 public class Orders {
@@ -14,7 +18,10 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    /**
+     * Many-to-One relationship with User - EAGER loaded since every order needs a user
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private Users user;
 
@@ -25,7 +32,10 @@ public class Orders {
     @Temporal(TemporalType.TIMESTAMP)
     private Date created_at;
 
-    @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
+    /**
+     * One-to-Many relationship with OrderItems - LAZY loaded (only when needed)
+     */
+    @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Orders() {

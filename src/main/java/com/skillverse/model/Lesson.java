@@ -5,6 +5,10 @@ import jakarta.persistence.*;
 
 import java.util.Objects;
 
+/**
+ * Entity class representing a lesson within a course.
+ * Contains Many-to-One relationship with Course for content organization.
+ */
 @Entity
 @Table(name = "lesson")
 public class Lesson {
@@ -13,6 +17,10 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /**
+     * Many-to-One relationship with Course
+     * LAZY loaded - course details loaded only when explicitly needed
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "course_id", nullable = false)
     @JsonIgnoreProperties({"lessons", "enrollments"})

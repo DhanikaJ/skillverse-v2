@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * Entity class representing a payment transaction.
+ * Contains Many-to-One relationships with Users, Course, and PaymentMethod.
+ * Tracks payment status, transaction reference, and timestamps.
+ */
 @Entity
 @Table(name = "payment")
 public class Payment {
@@ -12,17 +17,29 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    /**
+     * Many-to-One relationship with Users
+     * EAGER loaded since payment always needs user info
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private Users user;
 
-    @ManyToOne
+    /**
+     * Many-to-One relationship with Course
+     * EAGER loaded since payment always references a course
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "course_id")
     private Course course;
 
     private Double amount;
 
-    @ManyToOne
+    /**
+     * Many-to-One relationship with PaymentMethod
+     * LAZY loaded since method details not always needed
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_method_id")
     private PaymentMethod paymentMethod;
 

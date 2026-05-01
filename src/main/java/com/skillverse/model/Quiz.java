@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Entity class representing a quiz for a course.
+ * Contains Many-to-One relationship with Course and One-to-Many with QuizQuestions.
+ */
 @Entity
 @Table(name = "quiz")
 public class Quiz {
@@ -15,14 +19,22 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(optional = false)
+    /**
+     * Many-to-One relationship with Course
+     * EAGER loaded since quiz always belongs to a course
+     */
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "course_id", nullable = false)
     @JsonIgnoreProperties({"lessons", "enrollments", "quizzes"})
     private Course course;
 
     private String title;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    /**
+     * One-to-Many relationship with QuizQuestions
+     * LAZY loaded - questions loaded only when quiz details are viewed
+     */
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"quiz"})
     private List<QuizQuestion> questions = new ArrayList<>();
 

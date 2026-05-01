@@ -25,17 +25,35 @@ public class Course {
     private String thumbnail;
     //private Status status;
 
-    @ManyToOne
+    /**
+     * Many-to-One relationship with User (who created the course)
+     * EAGER loaded since important course metadata
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "users_id")
     private Users users;
     private Date created_at;
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    /**
+     * One-to-Many relationship with Enrollments
+     * LAZY loaded - only query when explicitly needed
+     */
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Enrollment> enrollments = new ArrayList<>();
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+
+    /**
+     * One-to-Many relationship with Lessons
+     * LAZY loaded - lessons loaded on-demand for specific course
+     */
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"course"})
     private List<Lesson> lessons = new ArrayList<>();
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+
+    /**
+     * One-to-Many relationship with Quizzes
+     * LAZY loaded - quizzes loaded on-demand for specific course
+     */
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"course"})
     private List<Quiz> quizzes = new ArrayList<>();
 

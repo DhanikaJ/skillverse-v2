@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * Entity class representing a student's enrollment in a course.
+ * Tracks enrollment status, progress, and associated status.
+ * Contains Many-to-One relationships with Users, Course, and Status.
+ */
 @Entity
 @Table(
         name = "enrollment",
@@ -15,11 +20,19 @@ public class Enrollment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(optional = false)
+    /**
+     * Many-to-One relationship with User
+     * EAGER loaded since enrollment always needs the student info
+     */
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @ManyToOne(optional = false)
+    /**
+     * Many-to-One relationship with Course
+     * EAGER loaded since enrollment always needs the course info
+     */
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
@@ -30,7 +43,11 @@ public class Enrollment {
     @Column(nullable = false)
     private double progress;
 
-    @ManyToOne
+    /**
+     * Many-to-One relationship with Status
+     * LAZY loaded since status might not always be needed
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
     private Status status;
 

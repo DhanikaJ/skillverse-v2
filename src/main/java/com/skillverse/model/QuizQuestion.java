@@ -5,6 +5,10 @@ import jakarta.persistence.*;
 
 import java.util.Objects;
 
+/**
+ * Entity class representing a question within a quiz.
+ * Contains question text, multiple choice options, and the correct answer.
+ */
 @Entity
 @Table(name = "quiz_question")
 public class QuizQuestion {
@@ -13,7 +17,11 @@ public class QuizQuestion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(optional = false)
+    /**
+     * Many-to-One relationship with Quiz
+     * EAGER loaded since question always belongs to a quiz
+     */
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "quiz_id", nullable = false)
     @JsonIgnoreProperties({"questions", "course"})
     private Quiz quiz;

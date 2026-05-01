@@ -8,6 +8,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Entity class representing a user/student in the system.
+ * Contains relationships with Status, City, Gender, Course, and Enrollment entities.
+ */
 @Entity
 @Table(name = "users")
 public class Users {
@@ -20,22 +24,49 @@ public class Users {
     private String email;
     private String password_hash;
     private String verification;
-    @ManyToOne
+
+    /**
+     * Many-to-One relationship with Status
+     * LAZY loaded since status details not always needed
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_id")
     private Status status;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date created_at;
-    @ManyToOne
+
+    /**
+     * Many-to-One relationship with City
+     * LAZY loaded since city details not always needed
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "city_id")
     private City  city;
+
     private String photo;
-    @ManyToOne
+
+    /**
+     * Many-to-One relationship with Gender
+     * LAZY loaded since gender not always needed
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gender_id")
     private Gender gender;
-    @OneToMany(mappedBy = "users")
+
+    /**
+     * One-to-Many relationship with Course (courses created by user)
+     * LAZY loaded since user's courses not always needed
+     */
+    @OneToMany(mappedBy = "users", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Course> course;
-    @OneToMany(mappedBy = "user")
+
+    /**
+     * One-to-Many relationship with Enrollment
+     * LAZY loaded since enrollments loaded on-demand
+     */
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Enrollment> enrollments;
 

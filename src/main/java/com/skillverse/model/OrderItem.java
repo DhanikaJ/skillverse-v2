@@ -3,6 +3,10 @@ package com.skillverse.model;
 import jakarta.persistence.*;
 import java.util.Objects;
 
+/**
+ * Entity class representing an item within an order.
+ * Contains Many-to-One relationships with Orders and Course.
+ */
 @Entity
 @Table(name = "order_item")
 public class OrderItem {
@@ -11,11 +15,19 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne
+    /**
+     * Many-to-One relationship with Orders
+     * EAGER loaded since item always belongs to an order
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "orders_id")
     private Orders orders;
 
-    @ManyToOne
+    /**
+     * Many-to-One relationship with Course
+     * EAGER loaded since item always references a course
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "course_id")
     private Course course;
 
