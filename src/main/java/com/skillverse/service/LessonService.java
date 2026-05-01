@@ -6,6 +6,7 @@ import com.skillverse.model.Lesson;
 import com.skillverse.repository.CourseRepository;
 import com.skillverse.repository.LessonRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class LessonService {
      * @return the created Lesson entity
      * @throws ResourceNotFoundException if the course is not found
      */
+    @Transactional
     public Lesson createLesson(Integer courseId, Lesson lesson) {
         Course course = getCourse(courseId);
         lesson.setId(null);
@@ -73,6 +75,7 @@ public class LessonService {
      * @return the updated Lesson entity
      * @throws ResourceNotFoundException if the lesson or course is not found
      */
+    @Transactional
     public Lesson updateLesson(Integer courseId, Integer lessonId, Lesson lessonRequest) {
         Lesson existingLesson = getLesson(courseId, lessonId);
 
@@ -91,6 +94,7 @@ public class LessonService {
      * @param lessonId the ID of the lesson to delete
      * @throws ResourceNotFoundException if the lesson or course is not found
      */
+    @Transactional
     public void deleteLesson(Integer courseId, Integer lessonId) {
         Lesson lesson = getLesson(courseId, lessonId);
         lessonRepository.delete(lesson);

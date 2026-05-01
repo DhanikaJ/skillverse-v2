@@ -7,6 +7,7 @@ import com.skillverse.repository.CourseRepository;
 import com.skillverse.repository.EnrollmentRepository;
 import com.skillverse.repository.UsersRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
@@ -38,6 +39,7 @@ public class AdminService {
      *
      * @return a list of all UserDTO objects
      */
+    @Transactional(readOnly = true)
     public List<UserDTO> getAllUsers() {
         return entityMapper.toUserDTOList(usersRepository.findAll());
     }
@@ -47,6 +49,7 @@ public class AdminService {
      *
      * @return a CourseStatsResponse containing platform statistics
      */
+    @Transactional(readOnly = true)
     public CourseStatsResponse getCourseStats() {
         long totalCourses = courseRepository.count();
         long totalEnrollments = enrollmentRepository.count();

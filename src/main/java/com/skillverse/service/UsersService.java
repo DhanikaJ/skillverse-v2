@@ -8,6 +8,7 @@ import com.skillverse.repository.UsersRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class UsersService {
      *
      * @param user the user entity to create
      */
+    @Transactional
     public void createUser(Users user) {
         usersRepository.save(user);
     }
@@ -75,6 +77,7 @@ public class UsersService {
      * @return the updated UserDTO object
      * @throws ResourceNotFoundException if the user is not found
      */
+    @Transactional
     public UserDTO updateUser(Integer id, Users userRequest) {
         Users existingUser = usersRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
@@ -94,6 +97,7 @@ public class UsersService {
      * @param id the user ID to delete
      * @throws ResourceNotFoundException if the user is not found
      */
+    @Transactional
     public void deleteUser(Integer id) {
         Users user = usersRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));

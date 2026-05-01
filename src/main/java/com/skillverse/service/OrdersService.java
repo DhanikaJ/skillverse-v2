@@ -6,6 +6,8 @@ import com.skillverse.repository.OrderItemRepository;
 import com.skillverse.repository.UsersRepository;
 import com.skillverse.repository.CourseRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +43,7 @@ public class OrdersService {
      * @return the created Orders entity
      * @throws RuntimeException if the user is not found
      */
+    @Transactional
     public Orders createOrder(Integer userId) {
         Users user = findUserById(userId);
 
@@ -62,6 +65,7 @@ public class OrdersService {
      * @return the created OrderItem entity
      * @throws RuntimeException if the order or course is not found
      */
+    @Transactional
     public OrderItem addItemToOrder(Integer orderId, Integer courseId, Double price) {
         Orders order = findOrderById(orderId);
         Course course = findCourseById(courseId);
@@ -120,6 +124,7 @@ public class OrdersService {
      * @return the updated Orders entity
      * @throws RuntimeException if the order is not found
      */
+    @Transactional
     public Orders updateOrderStatus(Integer orderId, String status) {
         Orders order = findOrderById(orderId);
         order.setStatus(status);

@@ -8,6 +8,7 @@ import com.skillverse.repository.CourseRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class CourseService {
      *
      * @param course the course entity to create
      */
+    @Transactional
     public void createCourse(Course course) {
         courseRepository.save(course);
     }
@@ -76,6 +78,7 @@ public class CourseService {
      * @return the updated CourseDTO object
      * @throws ResourceNotFoundException if the course is not found
      */
+    @Transactional
     public CourseDTO updateCourse(Integer id, Course courseRequest) {
         Course existingCourse = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with ID: " + id));
@@ -97,6 +100,7 @@ public class CourseService {
      * @param id the course ID to delete
      * @throws ResourceNotFoundException if the course is not found
      */
+    @Transactional
     public void deleteCourse(Integer id) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with ID: " + id));

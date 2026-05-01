@@ -11,6 +11,7 @@ import com.skillverse.repository.CourseRepository;
 import com.skillverse.repository.EnrollmentRepository;
 import com.skillverse.repository.UsersRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
@@ -46,6 +47,7 @@ public class EnrollmentService {
      * @throws ValidationException if the student is already enrolled in this course
      * @throws ResourceNotFoundException if the user or course is not found
      */
+    @Transactional
     public EnrollmentDTO enrollStudent(Integer studentId, Integer courseId) {
         if (enrollmentRepository.existsByUser_IdAndCourse_Id(studentId, courseId)) {
             throw new ValidationException("Student already enrolled in this course");

@@ -7,6 +7,7 @@ import com.skillverse.repository.CourseRepository;
 import com.skillverse.repository.QuizQuestionRepository;
 import com.skillverse.repository.QuizRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class QuizService {
      * @return the created Quiz entity
      * @throws IllegalStateException if the course is not found
      */
+    @Transactional
     public Quiz createQuiz(Integer courseId, String title) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalStateException("Course not found with ID: " + courseId));
@@ -53,6 +55,7 @@ public class QuizService {
      * @return a list of QuizQuestion entities
      * @throws IllegalStateException if the quiz is not found
      */
+    @Transactional(readOnly = true)
     public List<QuizQuestion> getQuestionsByQuizId(Integer quizId) {
         quizRepository.findById(quizId)
                 .orElseThrow(() -> new IllegalStateException("Quiz not found with ID: " + quizId));

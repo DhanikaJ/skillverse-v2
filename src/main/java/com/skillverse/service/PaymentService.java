@@ -7,6 +7,7 @@ import com.skillverse.repository.EnrollmentRepository;
 import com.skillverse.repository.UsersRepository;
 import com.skillverse.repository.CourseRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +49,7 @@ public class PaymentService {
      * @return the created Payment entity
      * @throws RuntimeException if the user or course is not found
      */
+    @Transactional
     public Payment createPayment(Integer userId, Integer courseId, Double amount, String paymentMethodName) {
         Users user = findUserById(userId);
         Course course = findCourseById(courseId);
@@ -84,6 +86,7 @@ public class PaymentService {
      * @return the updated Payment entity
      * @throws RuntimeException if the payment is not found
      */
+    @Transactional
     public Payment confirmPayment(String txnReference, String status) {
         Payment payment = paymentRepository.findByTxnReference(txnReference)
                 .orElseThrow(() -> new RuntimeException("Payment not found with txn_reference: " + txnReference));
