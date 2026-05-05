@@ -79,6 +79,19 @@ public class EnrollmentService {
     }
 
     /**
+     * Retrieves all enrollments for a given course.
+     *
+     * @param courseId the ID of the course
+     * @return a list of EnrollmentDTO objects
+     * @throws ResourceNotFoundException if the course is not found
+     */
+    public List<EnrollmentDTO> getEnrollmentsByCourseId(Integer courseId) {
+        findCourseById(courseId);
+        List<Enrollment> enrollments = enrollmentRepository.findByCourse_Id(courseId);
+        return entityMapper.toEnrollmentDTOList(enrollments);
+    }
+
+    /**
      * Finds a user by ID.
      *
      * @param userId the user ID

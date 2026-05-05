@@ -59,4 +59,19 @@ public class EnrollmentController {
         List<EnrollmentDTO> enrollments = enrollmentService.getEnrollmentsByUserId(userId);
         return ResponseEntity.ok(enrollments);
     }
+
+    /**
+     * Retrieves all enrollments for a course.
+     *
+     * @param courseId the ID of the course
+     * @return ResponseEntity with list of enrollment data (200 OK)
+     */
+    @GetMapping("/course/{courseId}")
+    @Operation(summary = "Get all enrollments for a course")
+    @ApiResponse(responseCode = "200", description = "Enrollments retrieved successfully")
+    @ApiResponse(responseCode = "404", description = "Course not found")
+    public ResponseEntity<List<EnrollmentDTO>> getCourseEnrollments(@PathVariable Integer courseId) {
+        List<EnrollmentDTO> enrollments = enrollmentService.getEnrollmentsByCourseId(courseId);
+        return ResponseEntity.ok(enrollments);
+    }
 }
