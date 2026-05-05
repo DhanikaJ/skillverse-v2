@@ -1,6 +1,7 @@
 package com.skillverse.controller;
 
 import com.skillverse.model.Payment;
+import com.skillverse.dto.PaymentDTO;
 import com.skillverse.service.PaymentService;
 import com.skillverse.service.OrdersService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -142,11 +144,11 @@ public class PaymentController {
      * Get payment by ID
      */
     @GetMapping("/{paymentId}")
-    public ResponseEntity<Payment> getPaymentById(@PathVariable Integer paymentId) {
+    public ResponseEntity<PaymentDTO> getPaymentById(@PathVariable Integer paymentId) {
         try {
             Optional<Payment> payment = paymentService.getPaymentById(paymentId);
             if (payment.isPresent()) {
-                return ResponseEntity.ok(payment.get());
+                return ResponseEntity.ok(new PaymentDTO(payment.get()));
             } else {
                 return ResponseEntity.notFound().build();
             }
@@ -159,10 +161,11 @@ public class PaymentController {
      * Get all payments for a user
      */
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Payment>> getUserPayments(@PathVariable Integer userId) {
+    public ResponseEntity<List<PaymentDTO>> getUserPayments(@PathVariable Integer userId) {
         try {
             List<Payment> payments = paymentService.getUserPayments(userId);
-            return ResponseEntity.ok(payments);
+            List<PaymentDTO> paymentDTOs = payments.stream().map(PaymentDTO::new).collect(Collectors.toList());
+            return ResponseEntity.ok(paymentDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -172,11 +175,11 @@ public class PaymentController {
      * Get payment by transaction reference
      */
     @GetMapping("/txn/{txnReference}")
-    public ResponseEntity<Payment> getPaymentByTxn(@PathVariable String txnReference) {
+    public ResponseEntity<PaymentDTO> getPaymentByTxn(@PathVariable String txnReference) {
         try {
             Optional<Payment> payment = paymentService.getPaymentByTxnReference(txnReference);
             if (payment.isPresent()) {
-                return ResponseEntity.ok(payment.get());
+                return ResponseEntity.ok(new PaymentDTO(payment.get()));
             } else {
                 return ResponseEntity.notFound().build();
             }
@@ -189,10 +192,11 @@ public class PaymentController {
      * Get all payments (admin)
      */
     @GetMapping
-    public ResponseEntity<List<Payment>> getAllPayments() {
+    public ResponseEntity<List<PaymentDTO>> getAllPayments() {
         try {
             List<Payment> payments = paymentService.getAllPayments();
-            return ResponseEntity.ok(payments);
+            List<PaymentDTO> paymentDTOs = payments.stream().map(PaymentDTO::new).collect(Collectors.toList());
+            return ResponseEntity.ok(paymentDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
