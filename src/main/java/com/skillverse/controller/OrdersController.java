@@ -2,6 +2,7 @@ package com.skillverse.controller;
 
 import com.skillverse.model.Orders;
 import com.skillverse.model.OrderItem;
+import com.skillverse.dto.OrderDTO;
 import com.skillverse.service.OrdersService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -80,11 +82,11 @@ public class OrdersController {
      * GET /api/v1/orders/1
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<Orders> getOrderById(@PathVariable Integer orderId) {
+    public ResponseEntity<OrderDTO> getOrderById(@PathVariable Integer orderId) {
         try {
             Optional<Orders> order = ordersService.getOrderById(orderId);
             if (order.isPresent()) {
-                return ResponseEntity.ok(order.get());
+                return ResponseEntity.ok(new OrderDTO(order.get()));
             } else {
                 return ResponseEntity.notFound().build();
             }
@@ -98,10 +100,11 @@ public class OrdersController {
      * GET /api/v1/orders/user/1
      */
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Orders>> getUserOrders(@PathVariable Integer userId) {
+    public ResponseEntity<List<OrderDTO>> getUserOrders(@PathVariable Integer userId) {
         try {
             List<Orders> orders = ordersService.getUserOrders(userId);
-            return ResponseEntity.ok(orders);
+            List<OrderDTO> orderDTOs = orders.stream().map(OrderDTO::new).collect(Collectors.toList());
+            return ResponseEntity.ok(orderDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
@@ -112,7 +115,7 @@ public class OrdersController {
      * GET /api/v1/orders?status=PENDING
      */
     @GetMapping
-    public ResponseEntity<List<Orders>> getOrdersByStatus(@RequestParam(required = false) String status) {
+    public ResponseEntity<List<OrderDTO>> getOrdersByStatus(@RequestParam(required = false) String status) {
         try {
             List<Orders> orders;
             if (status != null && !status.isEmpty()) {
@@ -120,7 +123,8 @@ public class OrdersController {
             } else {
                 orders = ordersService.getAllOrders();
             }
-            return ResponseEntity.ok(orders);
+            List<OrderDTO> orderDTOs = orders.stream().map(OrderDTO::new).collect(Collectors.toList());
+            return ResponseEntity.ok(orderDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
