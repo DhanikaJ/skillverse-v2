@@ -74,6 +74,7 @@ public class PaymentService {
      * @param txnReference the transaction reference
      * @return an Optional containing the Payment if found
      */
+    @Transactional(readOnly = true)
     public Optional<Payment> getPaymentByTxnReference(String txnReference) {
         return paymentRepository.findByTxnReference(txnReference);
     }
@@ -108,6 +109,7 @@ public class PaymentService {
      * @return a list of Payment entities
      * @throws RuntimeException if the user is not found
      */
+    @Transactional(readOnly = true)
     public List<Payment> getUserPayments(Integer userId) {
         Users user = findUserById(userId);
         return paymentRepository.findByUser(user);
@@ -119,6 +121,7 @@ public class PaymentService {
      * @param id the payment ID
      * @return an Optional containing the Payment if found
      */
+    @Transactional(readOnly = true)
     public Optional<Payment> getPaymentById(Integer id) {
         return paymentRepository.findById(id);
     }
@@ -128,6 +131,7 @@ public class PaymentService {
      *
      * @return a list of all Payment entities
      */
+    @Transactional(readOnly = true)
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
     }
