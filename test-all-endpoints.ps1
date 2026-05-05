@@ -33,15 +33,66 @@ function Test-Endpoint {
         $response = Invoke-WebRequest @params
 
         if ($response.StatusCode -eq $ExpectedStatus) {
-            Write-Output "✓ $Name ($($response.StatusCode) OK)"
+            Write-Output "OK $Name ($($response.StatusCode))"
             return $true
         } else {
-            Write-Output "✗ $Name (Expected $ExpectedStatus, got $($response.StatusCode))"
+            Write-Output "FAIL $Name (Expected $ExpectedStatus, got $($response.StatusCode))"
             return $false
         }
     } catch {
-        Write-Output "✗ $Name (ERROR: $($_.Exception.Message))"
+        Write-Output "ERR $Name (ERROR: $($_.Exception.Message))"
         return $false
+    }
+}
+
+# TEST 1: Create User
+Write-Output "`n[1] USERS - CREATE"
+$userBody = '{"fname":"John","lname":"Doe","email":"john.doe@example.com"}'
+if (Test-Endpoint -Method POST -Url "http://localhost:8080/api/v1/users" -Headers $headers -Body $userBody -Name "POST /api/v1/users" -ExpectedStatus 201) { $passed++ } else { $failed++ }
+
+# TEST 2: Get Users
+Write-Output "`n[2] USERS - GET ALL"
+$testUrl = "http://localhost:8080/api/v1/users?page=0&size=10"
+if (Test-Endpoint -Method GET -Url $testUrl -Headers $headers -Name "GET /api/v1/users" -ExpectedStatus 200) { $passed++ } else { $failed++; $failures += "GET /api/v1/users" }
+
+# TEST 3: Get User by ID
+Write-Output "`n[3] USERS - GET BY ID"
+if (Test-Endpoint -Method GET -Url "http://localhost:8080/api/v1/users/1" -Headers $headers -Name "GET /api/v1/users/1" -ExpectedStatus 200) { $passed++ } else { $failed++; $failures += "GET /api/v1/users/1" }
+
+# TEST 4: Create Course
+Write-Output "`n[4] COURSES - CREATE"
+$courseBody = '{"title":"Java Basics","description":"Learn Java programming from scratch","pricelevel":"beginner","difficulty":"easy","price":49.99,"thumbnail":"https://example.com/java.jpg"}'
+if (Test-Endpoint -Method POST -Url "http://localhost:8080/api/v1/courses" -Headers $headers -Body $courseBody -Name "POST /api/v1/courses" -ExpectedStatus 201) { $passed++ } else { $failed++ }
+
+# TEST 5: Get Courses
+Write-Output "`n[5] COURSES - GET ALL"
+$testUrl2 = "http://localhost:8080/api/v1/courses?page=0&size=10"
+if (Test-Endpoint -Method GET -Url $testUrl2 -Headers $headers -Name "GET /api/v1/courses" -ExpectedStatus 200) { $passed++ } else { $failed++; $failures += "GET /api/v1/courses" }
+
+# TEST 6: Get Course by ID
+Write-Output "`n[6] COURSES - GET BY ID"
+if (Test-Endpoint -Method GET -Url "http://localhost:8080/api/v1/courses/1" -Headers $headers -Name "GET /api/v1/courses/1" -ExpectedStatus 200) { $passed++ } else { $failed++; $failures += "GET /api/v1/courses/1" }
+
+# TEST 7: Enroll Student
+Write-Output "`n[7] ENROLLMENTS - ENROLL STUDENT"
+if (Test-Endpoint -Method POST -Url "http://localhost:8080/api/v1/enrollments/enroll/1/1" -Headers $headers -Name "POST /enrollments/enroll/1/1" -ExpectedStatus 201) { $passed++ } else { $failed++; $failures += "POST /enrollments/enroll" }
+
+# TEST 8: Get User Enrollments
+Write-Output "`n[8] ENROLLMENTS - GET USER ENROLLMENTS"
+if (Test-Endpoint -Method GET -Url "http://localhost:8080/api/v1/enrollments/user/1" -Headers $headers -Name "GET /enrollments/user/1" -ExpectedStatus 200) { $passed++ } else { $failed++; $failures += "GET /enrollments/user/1" }
+
+Write-Output ""
+Write-Output "======================================"
+Write-Output "TEST SUMMARY (8 core tests)"
+Write-Output "======================================"
+Write-Output "Passed: $passed"
+Write-Output "Failed: $failed"
+
+if ($failed -gt 0) {
+    Write-Output ""
+    Write-Output "FAILED ENDPOINTS:"
+    foreach ($failure in $failures) {
+        Write-Output "  - $failure"
     }
 }
 
@@ -185,4 +236,5 @@ if ($failed -eq 0) {
 } else {
     Write-Output "✗ $failed endpoint(s) need fixing"
 }
+
 

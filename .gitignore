@@ -26,6 +26,13 @@ REFACTORING_SUMMARY.md
 TRANSACTIONAL_IMPLEMENTATION_GUIDE.md
 FETCHTYPE_OPTIMIZATION_GUIDE.md
 VALID_AND_RESPONSEENTITY_GUIDE.md
+comprehensive-api-test.ps1
+FINAL_VERIFICATION.md
+GITHUB_COMMITS.md
+run-comprehensive-tests.ps1
+SESSION_SUMMARY.md
+test-output.log
+test-results.log
 
 ### STS ###
 .apt_generated
@@ -54,3 +61,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Environment Variables - DO NOT COMMIT
+.env
+.env.local
+.env.*.local
+

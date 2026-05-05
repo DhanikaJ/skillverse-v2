@@ -58,13 +58,21 @@ Write-Host "✓ GET /courses/$course1Id - Status: $($r.StatusCode)"
 
 # 5. Test Enrollment Endpoints
 Write-Host "`n[5] Creating Enrollment..."
-$enrollmentBody = @{userId=$user1Id; courseId=$course1Id} | ConvertTo-Json
-$r5 = Invoke-WebRequest -Uri "$baseUrl/enrollments" -Method POST -ContentType "application/json" -Body $enrollmentBody -UseBasicParsing -ErrorAction SilentlyContinue
-$enrollmentId = ($r5.Content | ConvertFrom-Json).id
-Write-Host "✓ Enrollment Created (ID: $enrollmentId)"
+try {
+    $r5 = Invoke-WebRequest -Uri "$baseUrl/enrollments/enroll/$user1Id/$course1Id" -Method POST -UseBasicParsing -ErrorAction SilentlyContinue
+    Write-Host "✓ POST /enrollments/enroll/$user1Id/$course1Id - Status: $($r5.StatusCode)"
+} catch {
+    $errorMsg = $_.Exception.Response.StatusCode.Value
+    Write-Host "✗ POST /enrollments/enroll - Error: $errorMsg"
+}
 
-$r = Invoke-WebRequest -Uri "$baseUrl/enrollments" -Method GET -UseBasicParsing -ErrorAction SilentlyContinue
-Write-Host "✓ GET /enrollments - Status: $($r.StatusCode)"
+try {
+    $r = Invoke-WebRequest -Uri "$baseUrl/enrollments/user/$user1Id" -Method GET -UseBasicParsing -ErrorAction SilentlyContinue
+    Write-Host "✓ GET /enrollments/user/$user1Id - Status: $($r.StatusCode)"
+} catch {
+    $errorMsg = $_.Exception.Response.StatusCode.Value
+    Write-Host "✗ GET /enrollments/user - Error: $errorMsg"
+}
 
 # 6. Test Payment Endpoints
 Write-Host "`n[6] Testing Payment Endpoints..."
@@ -105,4 +113,5 @@ try {
 }
 
 Write-Host "`n=== Test Complete ===" -ForegroundColor Green
+
 
