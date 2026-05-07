@@ -70,10 +70,13 @@ public class Users {
     @JsonIgnore
     private List<Enrollment> enrollments;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     public Users() {
     }
 
-    public Users(Integer id, String fname, String lname, String email, String password_hash, String verification, Status status, Date created_at, City city, String photo, Gender gender, List<Course> course) {
+    public Users(Integer id, String fname, String lname, String email, String password_hash, String verification, Status status, Date created_at, City city, String photo, Gender gender, List<Course> course, List<Enrollment> enrollments, Role role) {
         this.id = id;
         this.fname = fname;
         this.lname = lname;
@@ -86,6 +89,8 @@ public class Users {
         this.photo = photo;
         this.gender = gender;
         this.course = course;
+        this.enrollments = enrollments;
+        this.role = role;
     }
 
     public Integer getId() {
@@ -176,15 +181,23 @@ public class Users {
         this.gender = gender;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Users user = (Users) o;
-        return Objects.equals(id, user.id) && Objects.equals(fname, user.fname) && Objects.equals(lname, user.lname) && Objects.equals(email, user.email) && Objects.equals(password_hash, user.password_hash) && Objects.equals(verification, user.verification) && Objects.equals(status, user.status) && Objects.equals(created_at, user.created_at) && Objects.equals(city, user.city) && Objects.equals(photo, user.photo) && Objects.equals(gender, user.gender);
+        Users users = (Users) o;
+        return Objects.equals(id, users.id) && Objects.equals(fname, users.fname) && Objects.equals(lname, users.lname) && Objects.equals(email, users.email) && Objects.equals(password_hash, users.password_hash) && Objects.equals(verification, users.verification) && Objects.equals(status, users.status) && Objects.equals(created_at, users.created_at) && Objects.equals(city, users.city) && Objects.equals(photo, users.photo) && Objects.equals(gender, users.gender) && Objects.equals(course, users.course) && Objects.equals(enrollments, users.enrollments) && role == users.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fname, lname, email, password_hash, verification, status, created_at, city, photo, gender);
+        return Objects.hash(id, fname, lname, email, password_hash, verification, status, created_at, city, photo, gender, course, enrollments, role);
     }
 }
