@@ -3,6 +3,8 @@ package com.skillverse.repository;
 import com.skillverse.model.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CourseRepository extends JpaRepository<Course,Integer> {
+import java.util.Optional;
 
+public interface CourseRepository extends JpaRepository<Course,Integer> {
+    Optional<Course> findByTitle(String title);
 }

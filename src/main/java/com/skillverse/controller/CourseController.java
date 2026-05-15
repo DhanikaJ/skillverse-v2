@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public class CourseController {
      * @param size the page size (default: 10)
      * @return ResponseEntity with paginated course data (200 OK)
      */
+    @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR')")
     @GetMapping
     @Operation(summary = "Get all courses with pagination")
     @ApiResponse(responseCode = "200", description = "Courses retrieved successfully")
@@ -48,17 +50,18 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getCoursesWithPagination(pageable));
     }
 
-    /**
-     * Creates a new course.
-     *
-     * @param courseRequestDTO the course data to create (validated)
-     * @return ResponseEntity with created course data (201 Created)
-     */
-    @PostMapping
-    @Operation(summary = "Create a new course")
-    @ApiResponse(responseCode = "201", description = "Course created successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid course data")
-    public ResponseEntity<CourseDTO> createCourse(@Valid @RequestBody CourseRequestDTO courseRequestDTO) {
+     /**
+      * Creates a new course.
+      *
+      * @param courseRequestDTO the course data to create (validated)
+      * @return ResponseEntity with created course data (201 Created)
+      */
+     @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR')")
+     @PostMapping
+     @Operation(summary = "Create a new course")
+     @ApiResponse(responseCode = "201", description = "Course created successfully")
+     @ApiResponse(responseCode = "400", description = "Invalid course data")
+     public ResponseEntity<CourseDTO> createCourse(@Valid @RequestBody CourseRequestDTO courseRequestDTO) {
         Course course = new Course();
         course.setTitle(courseRequestDTO.getTitle());
         course.setDescription(courseRequestDTO.getDescription());
@@ -70,17 +73,18 @@ public class CourseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(courseService.getCourseById(course.getId()));
     }
 
-    /**
-     * Retrieves a course by its ID.
-     *
-     * @param id the course ID
-     * @return ResponseEntity with course data (200 OK) or (404 Not Found)
-     */
-    @GetMapping("/{id}")
-    @Operation(summary = "Get course by ID")
-    @ApiResponse(responseCode = "200", description = "Course found")
-    @ApiResponse(responseCode = "404", description = "Course not found")
-    public ResponseEntity<CourseDTO> getCourseById(@PathVariable Integer id) {
+     /**
+      * Retrieves a course by its ID.
+      *
+      * @param id the course ID
+      * @return ResponseEntity with course data (200 OK) or (404 Not Found)
+      */
+     @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR')")
+     @GetMapping("/{id}")
+     @Operation(summary = "Get course by ID")
+     @ApiResponse(responseCode = "200", description = "Course found")
+     @ApiResponse(responseCode = "404", description = "Course not found")
+     public ResponseEntity<CourseDTO> getCourseById(@PathVariable Integer id) {
         return ResponseEntity.ok(courseService.getCourseById(id));
     }
 

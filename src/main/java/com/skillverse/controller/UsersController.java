@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -37,7 +38,8 @@ public class UsersController {
      * @param size the page size (default: 10)
      * @return ResponseEntity with paginated user data (200 OK)
      */
-    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/users")
     @Operation(summary = "Get all users with pagination")
     @ApiResponse(responseCode = "200", description = "Users retrieved successfully")
     public ResponseEntity<Page<UserDTO>> getUsers(

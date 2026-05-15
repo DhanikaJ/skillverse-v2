@@ -1,30 +1,15 @@
--- This file is for cleaning up orphaned FK values only
--- Data initialization should be done via a separate mechanism
+-- Insert dummy users with different roles
+INSERT INTO users (email, password_hash, role, created_at)
+VALUES
+('instructor@example.com', '$2a$10$Y3xZ8q7pL9mK2jX4wQ8nP.wR6tY5uI9oP2sL3mK4nJ5oI8pQ7rW2', 'INSTRUCTOR', CURRENT_TIMESTAMP),
+('student@example.com', '$2a$10$Y3xZ8q7pL9mK2jX4wQ8nP.wR6tY5uI9oP2sL3mK4nJ5oI8pQ7rW2', 'STUDENT', CURRENT_TIMESTAMP),
+('admin@example.com', '$2a$10$Y3xZ8q7pL9mK2jX4wQ8nP.wR6tY5uI9oP2sL3mK4nJ5oI8pQ7rW2', 'ADMIN', CURRENT_TIMESTAMP)
+ON CONFLICT DO NOTHING;
 
--- Clean orphaned FK values before Hibernate applies/updates constraints.
-UPDATE users u
-SET city_id = NULL
-WHERE u.city_id IS NOT NULL
-  AND NOT EXISTS (
-      SELECT 1
-      FROM city c
-      WHERE c.id = u.city_id
-  );
-
-UPDATE users u
-SET gender_id = NULL
-WHERE u.gender_id IS NOT NULL
-  AND NOT EXISTS (
-      SELECT 1
-      FROM gender g
-      WHERE g.id = u.gender_id
-  );
-
-UPDATE users u
-SET status_id = NULL
-WHERE u.status_id IS NOT NULL
-  AND NOT EXISTS (
-      SELECT 1
-      FROM status s
-      WHERE s.id = u.status_id
-  );
+-- Insert dummy courses
+INSERT INTO course (title, description, pricelevel, difficulty, price, thumbnail, users_id, created_at)
+VALUES
+('Java Spring Boot Mastery', 'Learn to build enterprise applications with Spring Boot', 'INTERMEDIATE', 'INTERMEDIATE', 29.99, 'https://via.placeholder.com/300?text=Spring+Boot', 1, CURRENT_TIMESTAMP),
+('React JS Advanced', 'Master modern React with hooks, state management, and performance optimization', 'ADVANCED', 'ADVANCED', 39.99, 'https://via.placeholder.com/300?text=React', 1, CURRENT_TIMESTAMP),
+('Python Data Science', 'Complete guide to data analysis, visualization, and machine learning with Python', 'BEGINNER', 'BEGINNER', 19.99, 'https://via.placeholder.com/300?text=Python', 1, CURRENT_TIMESTAMP)
+ON CONFLICT DO NOTHING;
