@@ -1,7 +1,7 @@
 package com.skillverse.config;
 
 import com.skillverse.security.JwtAuthFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -22,8 +22,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthFilter jwtAuthFilter;
+    private final ObjectProvider<JwtAuthFilter> jwtAuthFilterProvider;
+
+    public SecurityConfig(ObjectProvider<JwtAuthFilter> jwtAuthFilterProvider) {
+        this.jwtAuthFilterProvider = jwtAuthFilterProvider;
+    }
 
     /**
      * PasswordEncoder bean for BCrypt password hashing
@@ -54,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/register","/auth/login").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilterProvider.getObject(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

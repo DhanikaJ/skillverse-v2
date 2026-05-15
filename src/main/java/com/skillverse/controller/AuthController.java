@@ -1,7 +1,6 @@
 package com.skillverse.controller;
 
 import com.skillverse.dto.AuthRequestDTO;
-import com.skillverse.dto.JwtTokenResponseDTO;
 import com.skillverse.model.Role;
 import com.skillverse.model.Users;
 import com.skillverse.repository.UsersRepository;
@@ -10,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -123,5 +123,33 @@ public class AuthController {
             ));
         }
     }
-}
 
+    /**
+     * Get current authenticated user info
+     * GET /api/v1/auth/me
+     * Requires JWT token in Authorization header
+     */
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> getCurrentUser() {
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Users user = usersRepository.findByEmail(email)
+                    .orElseThrow(() -> new Exception("User not found"));
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("id", user.getId());
+            response.put("email", user.getEmail());
+            response.put("fname", user.getFname());
+            response.put("lname", user.getLname());
+            response.put("role", user.getRole().name());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "success", false,
+                    "message", "Unauthorized: " + e.getMessage()
+            ));
+        }
+    }
+}
