@@ -18,19 +18,19 @@ public class UserDTO {
     @Email(message = "Email should be valid")
     private String email;
 
-    private String phone;
+    private String photo;
 
     private Date created_at;
 
     public UserDTO() {
     }
 
-    public UserDTO(Integer id, String fname, String lname, String email, String phone, Date created_at) {
+    public UserDTO(Integer id, String fname, String lname, String email, String photo, Date created_at) {
         this.id = id;
         this.fname = fname;
         this.lname = lname;
         this.email = email;
-        this.phone = phone;
+        this.photo = photo;
         this.created_at = created_at;
     }
 
@@ -66,12 +66,12 @@ public class UserDTO {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getPhoto() {
+        return photo;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
     public Date getCreated_at() {

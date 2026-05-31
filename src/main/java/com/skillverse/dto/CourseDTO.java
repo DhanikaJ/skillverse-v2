@@ -8,22 +8,28 @@ public class CourseDTO {
     private String description;
     private String pricelevel;
     private String difficulty;
+    private CategoryDTO category;
     private double price;
     private String thumbnail;
     private Date created_at;
+    private StatusDTO status;
+    private UserDTO users;
 
     public CourseDTO() {
     }
 
-    public CourseDTO(Integer id, String title, String description, String pricelevel, String difficulty, double price, String thumbnail, Date created_at) {
+    public CourseDTO(Integer id, String title, String description, String pricelevel, String difficulty, CategoryDTO category, double price, String thumbnail, Date created_at, StatusDTO status, UserDTO users) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.pricelevel = pricelevel;
         this.difficulty = difficulty;
+        this.category = category;
         this.price = price;
         this.thumbnail = thumbnail;
         this.created_at = created_at;
+        this.status = status;
+        this.users = users;
     }
 
     public Integer getId() {
@@ -66,6 +72,14 @@ public class CourseDTO {
         this.difficulty = difficulty;
     }
 
+    public CategoryDTO getCategory() {
+        return category;
+    }
+
+    public void setCategory(CategoryDTO category) {
+        this.category = category;
+    }
+
     public double getPrice() {
         return price;
     }
@@ -88,6 +102,22 @@ public class CourseDTO {
 
     public void setCreated_at(Date created_at) {
         this.created_at = created_at;
+    }
+
+    public StatusDTO getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusDTO status) {
+        this.status = status;
+    }
+
+    public UserDTO getUsers() {
+        return users;
+    }
+
+    public void setUsers(UserDTO users) {
+        this.users = users;
     }
 }
 

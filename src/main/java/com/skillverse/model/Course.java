@@ -20,10 +20,15 @@ public class Course {
     private String description;
     private String pricelevel;
     private String difficulty;
-    // private Category category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
     private double price;
     private String thumbnail;
-    //private Status status;
+
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private Status status;
 
     /**
      * Many-to-One relationship with User (who created the course)
@@ -57,10 +62,18 @@ public class Course {
     @JsonIgnoreProperties({"course"})
     private List<Quiz> quizzes = new ArrayList<>();
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     public Course() {
     }
 
-    public Course(Integer id, String title, String description, String pricelevel, String difficulty, double price, String thumbnail, Users user, Date created_at) {
+    public Course(Integer id, String title, String description, String pricelevel, String difficulty, double price, String thumbnail, Status status, Users users, Date created_at, List<Enrollment> enrollments, List<Lesson> lessons, List<Quiz> quizzes, Category category) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -68,8 +81,13 @@ public class Course {
         this.difficulty = difficulty;
         this.price = price;
         this.thumbnail = thumbnail;
-        this.users = user;
+        this.status = status;
+        this.users = users;
         this.created_at = created_at;
+        this.enrollments = enrollments;
+        this.lessons = lessons;
+        this.quizzes = quizzes;
+        this.category = category;
     }
 
     public Integer getId() {
@@ -168,6 +186,14 @@ public class Course {
 
     public void setQuizzes(List<Quiz> quizzes) {
         this.quizzes = quizzes;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     @Override

@@ -1,10 +1,9 @@
 package com.skillverse.mapper;
 
-import com.skillverse.dto.CourseDTO;
-import com.skillverse.dto.EnrollmentDTO;
-import com.skillverse.dto.UserDTO;
+import com.skillverse.dto.*;
 import com.skillverse.model.Course;
 import com.skillverse.model.Enrollment;
+import com.skillverse.model.Status;
 import com.skillverse.model.Users;
 import org.springframework.stereotype.Component;
 
@@ -60,15 +59,37 @@ public class EntityMapper {
         if (course == null) {
             return null;
         }
+        StatusDTO statusDTO = null;
+        if (course.getStatus() != null) {
+            statusDTO = new StatusDTO(
+                    course.getStatus().getId(),
+                    course.getStatus().getType()
+            );
+        }
+        UserDTO UserDTO = null;
+        if (course.getUsers() != null) {
+            UserDTO = new UserDTO(
+                    course.getUsers().getId(),
+                    course.getUsers().getFname(),
+                    course.getUsers().getLname(),
+                    course.getUsers().getEmail(),
+                     course.getUsers().getPhoto(),
+                    course.getUsers().getCreated_at()
+            );
+        }
+        CategoryDTO CategoryDTO = null;
         return new CourseDTO(
                 course.getId(),
                 course.getTitle(),
                 course.getDescription(),
                 course.getPricelevel(),
                 course.getDifficulty(),
+                CategoryDTO,
                 course.getPrice(),
                 course.getThumbnail(),
-                course.getCreated_at()
+                course.getCreated_at(),
+                statusDTO,
+                UserDTO
         );
     }
 
@@ -133,7 +154,7 @@ public class EntityMapper {
         user.setFname(dto.getFname());
         user.setLname(dto.getLname());
         user.setEmail(dto.getEmail());
-        user.setPhoto(dto.getPhone());
+         user.setPhoto(dto.getPhoto());
         user.setCreated_at(dto.getCreated_at());
         return user;
     }
@@ -157,6 +178,12 @@ public class EntityMapper {
         course.setPrice(dto.getPrice());
         course.setThumbnail(dto.getThumbnail());
         course.setCreated_at(dto.getCreated_at());
+        if (dto.getStatus() != null) {
+            Status status = new Status();
+            status.setId(dto.getStatus().getId());
+            status.setType(dto.getStatus().getType());
+            course.setStatus(status);
+        }
         return course;
     }
 }
