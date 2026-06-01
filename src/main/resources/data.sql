@@ -7,9 +7,9 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- Insert dummy courses
-INSERT INTO course (title, description, pricelevel, difficulty, price, thumbnail, users_id, created_at)
+INSERT INTO course (title, description, pricelevel, difficulty, price, thumbnail, users_id, created_at, status_id)
 VALUES
-('Java Spring Boot Mastery', 'Learn to build enterprise applications with Spring Boot', 'INTERMEDIATE', 'INTERMEDIATE', 29.99, 'https://via.placeholder.com/300?text=Spring+Boot', 1, CURRENT_TIMESTAMP),
-('React JS Advanced', 'Master modern React with hooks, state management, and performance optimization', 'ADVANCED', 'ADVANCED', 39.99, 'https://via.placeholder.com/300?text=React', 1, CURRENT_TIMESTAMP),
-('Python Data Science', 'Complete guide to data analysis, visualization, and machine learning with Python', 'BEGINNER', 'BEGINNER', 19.99, 'https://via.placeholder.com/300?text=Python', 1, CURRENT_TIMESTAMP)
+('Java Spring Boot Mastery', 'Learn to build enterprise applications with Spring Boot', 'INTERMEDIATE', 'INTERMEDIATE', 29.99, 'https://via.placeholder.com/300?text=Spring+Boot', 1, CURRENT_TIMESTAMP, 1),
+('React JS Advanced', 'Master modern React with hooks, state management, and performance optimization', 'ADVANCED', 'ADVANCED', 39.99, 'https://via.placeholder.com/300?text=React', 1, CURRENT_TIMESTAMP, 1),
+('Python Data Science', 'Complete guide to data analysis, visualization, and machine learning with Python', 'BEGINNER', 'BEGINNER', 19.99, 'https://via.placeholder.com/300?text=Python', 1, CURRENT_TIMESTAMP, 1)
 ON CONFLICT DO NOTHING;
