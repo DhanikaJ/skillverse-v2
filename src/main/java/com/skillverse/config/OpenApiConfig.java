@@ -19,8 +19,12 @@ import org.springframework.context.annotation.Configuration;
             description = "Local Development Server"
         ),
         @Server(
-            url = "https://api.skillverse.com",
-            description = "Production Server"
+            url = "https://myfutureskills.vercel.app",
+            description = "Production Server (Vercel)"
+        ),
+        @Server(
+            url = "${RAILWAY_PRODUCTION_URL:https://api.skillverse.railway.app}",
+            description = "Railway Production Server"
         )
     }
 )
