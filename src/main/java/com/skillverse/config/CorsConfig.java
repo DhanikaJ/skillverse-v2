@@ -21,11 +21,20 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        
+        // Split and trim to avoid whitespace issues
         String[] origins = allowedOrigins.split(",");
-        configuration.setAllowedOrigins(Arrays.asList(origins));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        List<String> allowedOriginsList = Arrays.stream(origins)
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(java.util.stream.Collectors.toList());
+        
+        configuration.setAllowedOrigins(allowedOriginsList);
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Link", "X-Total-Count"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -37,12 +46,18 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
+                // Split and trim to avoid whitespace issues
                 String[] origins = allowedOrigins.split(",");
+                String[] trimmedOrigins = Arrays.stream(origins)
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .toArray(String[]::new);
+
                 registry.addMapping("/**")
-                        .allowedOrigins(origins)
+                        .allowedOrigins(trimmedOrigins)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                         .allowedHeaders("*")
-                        .exposedHeaders("*")
+                        .exposedHeaders("Authorization")
                         .allowCredentials(true)
                         .maxAge(3600);
             }
