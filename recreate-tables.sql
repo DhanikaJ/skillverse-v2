@@ -57,9 +57,9 @@ CREATE TABLE users (
     email VARCHAR(255),
     password_hash VARCHAR(255),
     verification VARCHAR(255),
-    role VARCHAR(50),
-    photo VARCHAR(255),
     created_at TIMESTAMP,
+    photo VARCHAR(255),
+    role VARCHAR(50),
     city_id INTEGER REFERENCES city(id),
     gender_id INTEGER REFERENCES gender(id),
     status_id INTEGER REFERENCES status(id)
@@ -208,8 +208,8 @@ INSERT INTO payment_method (id, method) VALUES (2, 'DEBIT_CARD') ON CONFLICT DO 
 INSERT INTO payment_method (id, method) VALUES (3, 'PAYPAL') ON CONFLICT DO NOTHING;
 
 -- Insert sample data - User
-INSERT INTO users (id, fname, lname, email, password_hash, verification, role, created_at, city_id, gender_id, status_id)
-VALUES (1, 'Admin', 'User', 'admin@skillverse.com', '$2a$10$slYQmyNdGzin7olVN3p5Be.Kex7vOFrJ0nFMGxMV3YWHwsVjLRnfe', 'verified', 'ADMIN', NOW(), 1, 1, 1) ON CONFLICT DO NOTHING;
+INSERT INTO users (id, fname, lname, email, password_hash, verification, created_at, photo, role, city_id, gender_id, status_id)
+VALUES (1, 'Admin', 'User', 'admin@skillverse.com', '$2a$10$slYQmyNdGzin7olVN3p5Be.Kex7vOFrJ0nFMGxMV3YWHwsVjLRnfe', 'verified', NOW(), NULL, 'ADMIN', 1, 1, 1) ON CONFLICT DO NOTHING;
 
 -- Insert sample courses
 INSERT INTO course (id, title, description, pricelevel, difficulty, price, thumbnail, users_id, created_at, status_id)
