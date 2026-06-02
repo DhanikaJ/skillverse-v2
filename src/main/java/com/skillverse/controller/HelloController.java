@@ -10,6 +10,11 @@ import java.util.Map;
 @Tag(name = "Hello", description = "Testing endpoints")
 public class HelloController {
 
+    @GetMapping("/")
+    public Map<String,String> home(){
+        return Map.of("message", "Skillverse API is running", "status", "success");
+    }
+
     @GetMapping("/hello")
     public Map<String,String> hello(){
         return Map.of("message", "hello world");
