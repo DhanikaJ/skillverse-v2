@@ -22,7 +22,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @Tag(name = "Auth", description = "Authentication endpoints")
 public class AuthController {
 

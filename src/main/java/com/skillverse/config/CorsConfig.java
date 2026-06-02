@@ -32,7 +32,7 @@ public class CorsConfig {
         configuration.setAllowedOrigins(allowedOriginsList);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Link", "X-Total-Count"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Link", "X-Total-Count", "Content-Type", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -57,7 +57,7 @@ public class CorsConfig {
                         .allowedOrigins(trimmedOrigins)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                         .allowedHeaders("*")
-                        .exposedHeaders("Authorization")
+                        .exposedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials")
                         .allowCredentials(true)
                         .maxAge(3600);
             }
