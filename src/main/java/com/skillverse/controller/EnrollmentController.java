@@ -103,4 +103,23 @@ public class EnrollmentController {
         List<EnrollmentDTO> enrollments = enrollmentService.getEnrollmentsByCourseId(courseId);
         return ResponseEntity.ok(enrollments);
     }
+
+    /**
+     * Retrieves all enrollments for the currently authenticated user.
+     * Handles GET /api/v1/users/me/enrollments
+     *
+     * @return ResponseEntity with list of enrollment data (200 OK)
+     */
+    @GetMapping("/users/me/enrollments")
+    @Operation(summary = "Get all enrollments for the current user")
+    @ApiResponse(responseCode = "200", description = "Enrollments retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    public ResponseEntity<List<EnrollmentDTO>> getCurrentUserEnrollments() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        
+        List<EnrollmentDTO> enrollments = enrollmentService.getEnrollmentsByUserId(user.getId());
+        return ResponseEntity.ok(enrollments);
+    }
 }
