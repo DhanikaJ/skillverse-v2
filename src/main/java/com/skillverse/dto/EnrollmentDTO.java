@@ -24,6 +24,7 @@ public class EnrollmentDTO {
     private double progress;
     
     private String statusType;
+    private CourseDTO course;
 
     public EnrollmentDTO() {
     }
@@ -37,6 +38,18 @@ public class EnrollmentDTO {
         this.enrolled_at = enrolled_at;
         this.progress = progress;
         this.statusType = statusType;
+    }
+
+    public EnrollmentDTO(Integer id, Integer userId, String userName, Integer courseId, String courseTitle, Date enrolled_at, double progress, String statusType, CourseDTO course) {
+        this.id = id;
+        this.userId = userId;
+        this.userName = userName;
+        this.courseId = courseId;
+        this.courseTitle = courseTitle;
+        this.enrolled_at = enrolled_at;
+        this.progress = progress;
+        this.statusType = statusType;
+        this.course = course;
     }
 
     public Integer getId() {
@@ -101,6 +114,14 @@ public class EnrollmentDTO {
 
     public void setStatusType(String statusType) {
         this.statusType = statusType;
+    }
+
+    public CourseDTO getCourse() {
+        return course;
+    }
+
+    public void setCourse(CourseDTO course) {
+        this.course = course;
     }
 }
 

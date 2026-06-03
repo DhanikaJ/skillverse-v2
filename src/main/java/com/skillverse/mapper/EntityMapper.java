@@ -123,7 +123,8 @@ public class EntityMapper {
                 enrollment.getCourse().getTitle(),
                 enrollment.getEnrolled_at(),
                 enrollment.getProgress(),
-                enrollment.getStatus() != null ? enrollment.getStatus().getType() : "active"
+                enrollment.getStatus() != null ? enrollment.getStatus().getType() : "active",
+                toCourseDTO(enrollment.getCourse())
         );
     }
 
