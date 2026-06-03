@@ -42,18 +42,23 @@ PostgreSQL Database
 <b>Design choices</b> 
 
 - Controllers are thin; business rules live in services
-- JPA entities model relationships (User ↔ Enrollment ↔ Course)
-- Exceptions bubble to a global handler (planned/optional)
-- Schema managed via ddl-auto=update (dev)
+- JPA entities model relationships (User ↔ Enrollment ↔ Course ↔ Payment)
+- Exceptions bubble to a centralized `@ControllerAdvice` handler
+- Schema managed via `ddl-auto=validate` in production
+- Environment-driven configuration via `.env` and Spring Profiles
 
 # ✨ Features
-- Users API — create & retrieve users
-- Courses API — create & retrieve courses
-- Enrollments — link users to courses (prevents duplicates)
-- REST conventions — resource-based URLs, proper HTTP methods
-- Persistence — JPA/Hibernate with PostgreSQL
-- Extensible — ready for validation, pagination, and auth
-- Interactive API documentation using Swagger UI
+- **Authentication & Security** — JWT-based stateless authentication with Spring Security
+- **Users API** — create & retrieve users with role-based access
+- **Courses API** — manage courses, lessons, and quizzes
+- **Enrollments** — automated link between users and courses (idempotent)
+- **Payment Integration** — Complete PayHere payment gateway integration with webhooks
+- **Input Validation** — Comprehensive request validation using Jakarta Bean Validation
+- **Pagination & Filtering** — Optimized data retrieval for large datasets
+- **File Uploads** — Cloudinary integration for course thumbnails and resources
+- **Error Handling** — Global exception handler for consistent API responses
+- **Documentation** — Interactive API documentation via Swagger UI
+- **Deployment Ready** — Multi-profile configuration (dev/prod) for Railway deployment
 
 # 📖 API Documentation
 - Interactive API documentation is available via Swagger UI:
@@ -89,11 +94,15 @@ Example response
 
 # ⚙️ Tech Stack
 - Java 17
-- Spring Boot 3.x
+- Spring Boot 3.2.5
+- Spring Security (JWT)
 - Spring Data JPA (Hibernate)
-- PostgreSQL
+- PostgreSQL / H2 (Test)
+- PayHere Payment Gateway
+- Cloudinary (File Storage)
 - Maven
-- Postman (API testing)
+- OpenAPI / Swagger UI
+- Railway (Deployment)
 
 # ▶️ Run Locally
 1) Clone
@@ -102,22 +111,21 @@ git clone https://github.com/YOUR_USERNAME/skillverse-v2.git
 cd skillverse-v2
 ```
 
-2) Database
-
-Ensure PostgreSQL is running (local or Docker). Example:
+2) Environment Variables
+Create a `.env` file in the root directory:
 ```text
-# src/main/resources/application.properties
-spring.datasource.url=jdbc:postgresql://localhost:5332/skillverse
-spring.datasource.username=postgres
-spring.datasource.password=password
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+DATABASE_URL=jdbc:postgresql://localhost:5332/skillverse-v2
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=password
+JWT_SECRET=your_secret_key
+CLOUDINARY_CLOUD_NAME=your_cloud
+CLOUDINARY_API_KEY=your_key
+CLOUDINARY_API_SECRET=your_secret
 ```
 
 3) Start app
 ```text
-./mvnw spring-boot:run
-# or: mvn spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 4) Test
@@ -149,24 +157,28 @@ http://localhost:8080/swagger-ui/index.html
 # 🗂️ Project Structure
 ```text
 src/main/java/com/skillverse
- ├── controller
- ├── service
- ├── repository
- └── entity
+ ├── config          # Security, CORS, OpenAPI configs
+ ├── controller      # REST Controllers (API endpoints)
+ ├── service         # Business logic & integrations
+ ├── repository      # Database access (JPA)
+ ├── entity          # Database models
+ ├── dto             # Data Transfer Objects (Request/Response)
+ ├── security        # JWT & Auth filters
+ └── exception       # Global error handling
 ```
 
 # 🧪 Notes on Design
-- Idempotency: duplicate enrollment attempts are rejected
-- Naming: resource-oriented endpoints (/users, /courses, /enrollments)
-- Separation: HTTP concerns vs. business logic vs. persistence
-- Extensibility: ready for DTO layer, validation, pagination
+- **Security**: Stateless JWT-based security with password hashing (BCrypt)
+- **Validation**: Strict input validation using `@Valid` and Request DTOs
+- **Persistence**: Relational modeling with PostgreSQL and Hibernate optimizations
+- **Scalability**: Pagination and filtering implemented for all major resource listings
+- **Integrations**: Service-oriented architecture for external APIs (PayHere, Cloudinary)
 
 # 🗺️ Roadmap
-- JWT Authentication & authorization
-- Pagination & filtering (/users?page=...)
-- Global exception handling (@ControllerAdvice)
-- OpenAPI/Swagger docs
-- Dockerized setup (app + DB)
-- CI pipeline (build & tests)
+- [ ] Email Notifications (Order confirmation, Password reset)
+- [ ] Analytics Dashboard for Admin users
+- [ ] Multi-tenant support for different organizations
+- [ ] Mobile App integration (React Native)
+- [ ] Unit & Integration testing coverage expansion
 
 <b>👤 Author<b/> - Dhanika Jagodaarachchi
