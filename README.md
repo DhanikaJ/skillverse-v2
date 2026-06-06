@@ -18,6 +18,7 @@
 ## 🚀 Overview
 SkillVerse is a RESTful backend that manages **users, courses, and enrollments** featuring interactive API documentation via Swagger UI, **normalized data modeling**, and **layered architecture**.  
 It demonstrates production patterns such as **idempotent endpoints**, **validation-ready DTOs**, and **clear separation of concerns**.
+**Backend API:** skillverse-v2-production.up.railway.app
 
 ---
 
@@ -101,6 +102,7 @@ Example response
 - PayHere Payment Gateway
 - Cloudinary (File Storage)
 - Maven
+- Postman (API Testing)
 - OpenAPI / Swagger UI
 - Railway (Deployment)
 
