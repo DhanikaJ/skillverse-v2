@@ -1,4 +1,4 @@
-# SkillVerse v2 — Backend API
+# SkillVerse 2.0 - Backend API
 
 REST API for **SkillVerse**, an online learning platform. Built with Spring Boot as a hands-on project to practise layered architecture, JWT security, relational modelling and third-party integrations (Cloudinary, PayHere).
 
@@ -55,18 +55,18 @@ These are public sandbox accounts holding generated sample data only. The admini
 
 **Implemented**
 
-- **Authentication** — registration and login return a signed JWT; `GET /auth/me` resolves the current user. Passwords are stored with BCrypt.
-- **Roles and ownership** — `STUDENT`, `INSTRUCTOR`, `ADMIN`, enforced with method-level security and per-resource ownership checks.
-- **Courses** — paginated listing, detail lookup and creation, with Bean Validation on request bodies.
-- **Enrollment** — enrol the current user, list "my" enrollments, list by user or by course; duplicate enrollment is rejected.
-- **Lessons** — full CRUD nested under a course.
-- **Quizzes** — create quizzes and fetch their questions.
-- **Orders and payments** — order and order-item records, payments priced from the course, and a signature-verified PayHere notification endpoint that enrols the learner when a payment succeeds.
-- **File upload** — multipart upload to Cloudinary, 10 MB limit.
-- **Admin** — user listing and course/enrollment statistics.
-- **Centralised error handling** — `GlobalExceptionHandler` maps validation, not-found and state errors to an `ErrorResponse` shape.
-- **API docs** — OpenAPI 3 / Swagger UI (development and test profiles).
-- **Seed data** — sample users, courses and enrollments for development and tests (never in production).
+- **Authentication** - registration and login return a signed JWT; `GET /auth/me` resolves the current user. Passwords are stored with BCrypt.
+- **Roles and ownership** - `STUDENT`, `INSTRUCTOR`, `ADMIN`, enforced with method-level security and per-resource ownership checks.
+- **Courses** - paginated listing, detail lookup and creation, with Bean Validation on request bodies.
+- **Enrollment** - enrol the current user, list "my" enrollments, list by user or by course; duplicate enrollment is rejected.
+- **Lessons** - full CRUD nested under a course.
+- **Quizzes** - create quizzes and fetch their questions.
+- **Orders and payments** - order and order-item records, payments priced from the course, and a signature-verified PayHere notification endpoint that enrols the learner when a payment succeeds.
+- **File upload** - multipart upload to Cloudinary, 10 MB limit.
+- **Admin** - user listing and course/enrollment statistics.
+- **Centralised error handling** - `GlobalExceptionHandler` maps validation, not-found and state errors to an `ErrorResponse` shape.
+- **API docs** - OpenAPI 3 / Swagger UI (development and test profiles).
+- **Seed data** - sample users, courses and enrollments for development and tests (never in production).
 
 **Modelled, endpoints not yet exposed:** cart, certificates, reviews, quiz attempts.
 
@@ -123,9 +123,9 @@ Packages follow the layers: `controller` → `service` → `repository` → `mod
 
 **Postman**
 
-<img alt="Postman — create user" src="docs/postman_create_user.png">
-<img alt="Postman — create course" src="docs/postman_create_course.png">
-<img alt="Postman — enrollment" src="docs/postman-enrollment.png">
+<img alt="Postman - create user" src="docs/postman_create_user.png">
+<img alt="Postman - create course" src="docs/postman_create_course.png">
+<img alt="Postman - enrollment" src="docs/postman-enrollment.png">
 
 **Database (PostgreSQL)**
 
@@ -234,7 +234,7 @@ Response: `{ "success": true, "message": "…", "token": "…", "type": "Bearer"
 ### Prerequisites
 
 - JDK 17
-- Docker (for the local PostgreSQL container) — or any PostgreSQL 14+ instance
+- Docker (for the local PostgreSQL container) - or any PostgreSQL 14+ instance
 - Optional: a Cloudinary account (only needed to exercise `/upload`)
 
 ### Run locally
@@ -327,7 +327,7 @@ In `skillverse-ui`, set:
 VITE_API_BASE_URL=http://localhost:8080/api/v1
 ```
 
-Add the UI origin (default `http://localhost:5173`) to the backend CORS configuration — see [Configuration](#configuration).
+Add the UI origin (default `http://localhost:5173`) to the backend CORS configuration - see [Configuration](#configuration).
 
 ---
 
@@ -432,7 +432,7 @@ The API is configured for a container/PaaS host (Railway) with a managed Postgre
    ```
 4. Point the UI's `VITE_API_BASE_URL` at `https://<api-host>/api/v1` and make sure the UI origin is allowed by CORS.
 
-> The schema is managed with Hibernate `ddl-auto=update`. `recreate-tables.sql` drops every table — use it only on a disposable development database.
+> The schema is managed with Hibernate `ddl-auto=update`. `recreate-tables.sql` drops every table - use it only on a disposable development database.
 
 ---
 
@@ -512,4 +512,4 @@ Released under the [MIT License](LICENSE).
 
 ## Author
 
-**DhanikaJ** — [portfolio](https://DhanikaJ.dev) · [GitHub](https://github.com/DhanikaJ)
+**DhanikaJ** - [portfolio](https://DhanikaJ.dev)
