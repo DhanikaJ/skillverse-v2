@@ -4,7 +4,9 @@ import com.skillverse.dto.EnrollmentDTO;
 import com.skillverse.exception.ResourceNotFoundException;
 import com.skillverse.model.Users;
 import com.skillverse.repository.UsersRepository;
+import com.skillverse.security.AccessPolicy;
 import com.skillverse.service.EnrollmentService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,10 +27,13 @@ public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
     private final UsersRepository usersRepository;
+    private final AccessPolicy accessPolicy;
 
-    public EnrollmentController(EnrollmentService enrollmentService, UsersRepository usersRepository) {
+    public EnrollmentController(EnrollmentService enrollmentService, UsersRepository usersRepository,
+                                AccessPolicy accessPolicy) {
         this.enrollmentService = enrollmentService;
         this.usersRepository = usersRepository;
+        this.accessPolicy = accessPolicy;
     }
 
     /**
@@ -45,11 +50,7 @@ public class EnrollmentController {
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "404", description = "Course not found")
     public ResponseEntity<EnrollmentDTO> enrollCurrentStudent(@PathVariable Integer courseId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Users user = usersRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-        
-        EnrollmentDTO enrollment = enrollmentService.enrollStudent(user.getId(), courseId);
+        EnrollmentDTO enrollment = enrollmentService.enrollCurrentUser(courseId);
         return ResponseEntity.status(HttpStatus.CREATED).body(enrollment);
     }
 
@@ -61,6 +62,7 @@ public class EnrollmentController {
      * @param courseId the ID of the course
      * @return ResponseEntity with enrollment data (201 Created) or error
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/enrollments/enroll/{studentId}/{courseId}")
     @Operation(summary = "Enroll a student in a course by ID")
     @ApiResponse(responseCode = "201", description = "Student enrolled successfully")
@@ -85,6 +87,7 @@ public class EnrollmentController {
     @ApiResponse(responseCode = "200", description = "Enrollments retrieved successfully")
     @ApiResponse(responseCode = "404", description = "User not found")
     public ResponseEntity<List<EnrollmentDTO>> getUserEnrollments(@PathVariable Integer userId) {
+        accessPolicy.requireSelfOrAdmin(userId);
         List<EnrollmentDTO> enrollments = enrollmentService.getEnrollmentsByUserId(userId);
         return ResponseEntity.ok(enrollments);
     }

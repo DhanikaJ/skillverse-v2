@@ -6,7 +6,9 @@ import com.skillverse.repository.EnrollmentRepository;
 import com.skillverse.repository.UsersRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.Optional;
 
+/**
+ * Seeds sample users, courses and enrollments for local development and tests.
+ *
+ * Active only in the {@code dev} and {@code test} profiles, so no sample accounts are ever
+ * created in production. The seed password comes from {@code app.seed.password}
+ * (environment variable {@code SEED_PASSWORD}).
+ */
 @Component
+@Profile({"dev", "test"})
 public class DataSeeder implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSeeder.class);
@@ -23,15 +33,18 @@ public class DataSeeder implements CommandLineRunner {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final String seedPassword;
 
     public DataSeeder(UsersRepository usersRepository,
                       CourseRepository courseRepository,
                       EnrollmentRepository enrollmentRepository,
-                      PasswordEncoder passwordEncoder) {
+                      PasswordEncoder passwordEncoder,
+                      @Value("${app.seed.password}") String seedPassword) {
         this.usersRepository = usersRepository;
         this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
         this.passwordEncoder = passwordEncoder;
+        this.seedPassword = seedPassword;
     }
 
     @Override
@@ -40,6 +53,11 @@ public class DataSeeder implements CommandLineRunner {
         logger.info("Starting data seeding...");
         
         try {
+            // 0. Create one account per role for local testing
+            createUserIfNotFound("admin@example.com", "Admin", "User", Role.ADMIN);
+            createUserIfNotFound("instructor@example.com", "Demo", "Instructor", Role.INSTRUCTOR);
+            createUserIfNotFound("student@example.com", "Demo", "Student", Role.STUDENT);
+
             // 1. Create Instructors
             Users instructor1 = createUserIfNotFound("dr.smith@skillverse.com", "John", "Smith", Role.INSTRUCTOR);
             Users instructor2 = createUserIfNotFound("prof.jones@skillverse.com", "Sarah", "Jones", Role.INSTRUCTOR);
@@ -94,7 +112,7 @@ public class DataSeeder implements CommandLineRunner {
         user.setEmail(email);
         user.setFname(fname);
         user.setLname(lname);
-        user.setPassword_hash(passwordEncoder.encode("password123"));
+        user.setPassword_hash(passwordEncoder.encode(seedPassword));
         user.setRole(role);
         user.setCreated_at(new Date());
         
@@ -114,7 +132,7 @@ public class DataSeeder implements CommandLineRunner {
         course.setDescription(description);
         course.setPrice(price);
         course.setDifficulty(difficulty);
-        course.setPricelevel(difficulty); // Using difficulty as pricelevel for consistency with DataInitializationConfig
+        course.setPricelevel(difficulty); // pricelevel mirrors difficulty for seed data
         course.setUser(instructor);
         course.setCreated_at(new Date());
         course.setThumbnail("https://via.placeholder.com/300?text=" + title.replace(" ", "+"));

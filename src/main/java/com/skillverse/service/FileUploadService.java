@@ -43,6 +43,14 @@ public class FileUploadService {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
+        String contentType = file.getContentType();
+        boolean allowed = contentType != null
+                && (contentType.startsWith("image/")
+                || contentType.startsWith("video/")
+                || contentType.equals("application/pdf"));
+        if (!allowed) {
+            throw new IllegalArgumentException("Only image, video and PDF files are allowed");
+        }
 
         try {
             Map uploadResult = cloudinary.uploader().upload(

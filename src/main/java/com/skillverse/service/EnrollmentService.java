@@ -9,7 +9,10 @@ import com.skillverse.model.Enrollment;
 import com.skillverse.model.Users;
 import com.skillverse.repository.CourseRepository;
 import com.skillverse.repository.EnrollmentRepository;
+import com.skillverse.repository.PaymentRepository;
 import com.skillverse.repository.UsersRepository;
+import com.skillverse.security.AccessPolicy;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -25,17 +28,50 @@ public class EnrollmentService {
     private final UsersRepository usersRepository;
     private final CourseRepository courseRepository;
     private final EntityMapper entityMapper;
+    private final PaymentRepository paymentRepository;
+    private final AccessPolicy accessPolicy;
+    private final boolean requirePayment;
 
     public EnrollmentService(
             EnrollmentRepository enrollmentRepository,
             UsersRepository usersRepository,
             CourseRepository courseRepository,
-            EntityMapper entityMapper
+            EntityMapper entityMapper,
+            PaymentRepository paymentRepository,
+            AccessPolicy accessPolicy,
+            @Value("${app.enrollment.require-payment:false}") boolean requirePayment
     ) {
         this.enrollmentRepository = enrollmentRepository;
         this.usersRepository = usersRepository;
         this.courseRepository = courseRepository;
         this.entityMapper = entityMapper;
+        this.paymentRepository = paymentRepository;
+        this.accessPolicy = accessPolicy;
+        this.requirePayment = requirePayment;
+    }
+
+    /**
+     * Self-service enrollment for the authenticated user.
+     *
+     * When {@code app.enrollment.require-payment} is enabled, a paid course can only be joined
+     * after a successful payment; otherwise any authenticated user may enrol directly (sandbox mode).
+     *
+     * @throws ValidationException if payment is required but missing, or the user is already enrolled
+     */
+    @Transactional
+    public EnrollmentDTO enrollCurrentUser(Integer courseId) {
+        Users user = accessPolicy.currentUser();
+        Course course = findCourseById(courseId);
+
+        if (requirePayment && course.getPrice() > 0 && !hasSuccessfulPayment(user, course)) {
+            throw new ValidationException("Payment is required to enrol in this course");
+        }
+        return enrollStudent(user.getId(), courseId);
+    }
+
+    private boolean hasSuccessfulPayment(Users user, Course course) {
+        return paymentRepository.findByUserAndCourse(user, course).stream()
+                .anyMatch(p -> "SUCCESS".equals(p.getStatus()) || "COMPLETED".equals(p.getStatus()));
     }
 
     /**
@@ -86,7 +122,8 @@ public class EnrollmentService {
      * @throws ResourceNotFoundException if the course is not found
      */
     public List<EnrollmentDTO> getEnrollmentsByCourseId(Integer courseId) {
-        findCourseById(courseId);
+        Course course = findCourseById(courseId);
+        accessPolicy.requireCourseManager(course);
         List<Enrollment> enrollments = enrollmentRepository.findByCourse_Id(courseId);
         return entityMapper.toEnrollmentDTOList(enrollments);
     }

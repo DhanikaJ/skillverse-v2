@@ -22,7 +22,9 @@ public class Users {
     private String fname;
     private String lname;
     private String email;
+    @JsonIgnore
     private String password_hash;
+    @JsonIgnore
     private String verification;
 
     /**

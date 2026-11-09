@@ -3,6 +3,7 @@ package com.skillverse.controller;
 import com.skillverse.dto.UserDTO;
 import com.skillverse.dto.UserRequestDTO;
 import com.skillverse.model.Users;
+import com.skillverse.security.AccessPolicy;
 import com.skillverse.service.UsersService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,9 +27,11 @@ import org.springframework.web.bind.annotation.*;
 public class UsersController {
 
     private final UsersService usersService;
+    private final AccessPolicy accessPolicy;
 
-    public UsersController(UsersService usersService) {
+    public UsersController(UsersService usersService, AccessPolicy accessPolicy) {
         this.usersService = usersService;
+        this.accessPolicy = accessPolicy;
     }
 
     /**
@@ -60,6 +63,7 @@ public class UsersController {
     @ApiResponse(responseCode = "200", description = "User found")
     @ApiResponse(responseCode = "404", description = "User not found")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Integer id) {
+        accessPolicy.requireSelfOrAdmin(id);
         return ResponseEntity.ok(usersService.getUserById(id));
     }
 
@@ -69,8 +73,9 @@ public class UsersController {
      * @param userRequestDTO the user data to create (validated)
      * @return ResponseEntity with created user data (201 Created)
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    @Operation(summary = "Create a new user")
+    @Operation(summary = "Create a new user (admin only)")
     @ApiResponse(responseCode = "201", description = "User created successfully")
     @ApiResponse(responseCode = "400", description = "Invalid user data")
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserRequestDTO userRequestDTO) {
