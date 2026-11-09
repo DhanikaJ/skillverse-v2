@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Seeds the sandbox showcase: three public demo accounts (student, instructor, administrator)
@@ -161,6 +162,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final PaymentMethodRepository paymentMethodRepository;
     private final PasswordEncoder passwordEncoder;
     private final DemoProperties demoProperties;
+    private final AtomicBoolean ready = new AtomicBoolean(false);
 
     public DemoDataSeeder(UsersRepository usersRepository,
                           CourseRepository courseRepository,
@@ -182,6 +184,14 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.paymentMethodRepository = paymentMethodRepository;
         this.passwordEncoder = passwordEncoder;
         this.demoProperties = demoProperties;
+    }
+
+    /**
+     * True once seeding has finished. The web server starts answering requests a moment before
+     * the seeder runs, so the demo-accounts endpoint reports 503 until this is true.
+     */
+    public boolean isReady() {
+        return ready.get();
     }
 
     @Override
@@ -230,6 +240,7 @@ public class DemoDataSeeder implements CommandLineRunner {
             ensurePendingPayment(student, courses.get(POSTGRES), payHere);
 
             logger.info("Demo data ready: {} courses, {} users", courseRepository.count(), usersRepository.count());
+            ready.set(true);
         } catch (Exception e) {
             logger.error("Demo data seeding failed", e);
         }

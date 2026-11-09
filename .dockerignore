@@ -1,0 +1,12 @@
+.git
+.idea
+.vscode
+target
+docs
+.env
+.env.*
+*.log
+*.md
+!README.md
+*.ps1
+*.bat
