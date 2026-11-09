@@ -16,6 +16,20 @@ REST API for **SkillVerse**, an online learning platform. Built with Spring Boot
 | **Status** | Sandbox / learning project |
 | **API base path** | `/api/v1` (default port `8080`) |
 
+### Try the live demo
+
+Open the [live demo](https://skillverse-ui.vercel.app/login) and use the **Demo accounts** panel on the login page, or sign in manually:
+
+| Role | Email | What you can do |
+|---|---|---|
+| Student | `demo.student@example.com` | Browse courses, enrol, open **My Courses** with progress already recorded |
+| Instructor | `demo.instructor@example.com` | Owns four courses with lessons and quizzes; can create courses and lessons |
+| Administrator | `demo.admin@example.com` | Read-only view of users, payments, orders and statistics |
+
+Password for all three: `Demo@2026`
+
+These are public sandbox accounts holding generated sample data only. The administrator is read-only and file uploads are disabled for demo accounts. See [Demo mode](#demo-mode-sandbox-showcase).
+
 ---
 
 ## Table of contents
@@ -133,6 +147,7 @@ Base URL: `http://localhost:8080/api/v1`. Interactive docs are served at `/swagg
 | `POST` | `/auth/register` | Create a `STUDENT` account, returns a JWT | Public |
 | `POST` | `/auth/login` | Authenticate, returns a JWT | Public |
 | `GET` | `/auth/me` | Current user profile | Auth |
+| `GET` | `/auth/demo-accounts` | Public demo credentials (empty unless demo mode is on) | Public |
 
 Request body for register/login: `{ "email": "…", "password": "…" }`
 Response: `{ "success": true, "message": "…", "token": "…", "type": "Bearer", "email": "…", "role": "STUDENT" }`
@@ -286,6 +301,24 @@ All sample accounts share the password in `SEED_PASSWORD` (default `password123`
 
 **Seeding never runs in the default or `prod` profile.** Only the payment-method reference data is created in every environment.
 
+### Demo mode (sandbox showcase)
+
+Demo mode turns the deployment into a recruiter-friendly showcase. It is **off by default**; enable it with `DEMO_MODE=true` in any profile, including `prod`.
+
+What it does:
+
+- Creates three demo accounts (student, instructor, administrator) that share one **public** password (`DEMO_PASSWORD`, default `Demo@2026`). The password is rotated into the stored hash on every start if you change it.
+- Seeds a realistic catalogue: eight courses (one free) across four instructors, four lessons per course, three quizzes, fifteen learner enrollments with varying progress, and the matching orders and payments. The demo student is enrolled in three courses and the rest stay open so the enrol flow can be tried.
+- Supporting instructors and learners are locked accounts: they own data but cannot sign in.
+- Publishes the credentials at `GET /api/v1/auth/demo-accounts` so the UI can show one-click demo sign-in.
+- Seeding is idempotent; restarting never duplicates data.
+
+Because the password is public, demo accounts are limited: the demo administrator is read-only (every non-`GET` request is rejected with `403`), and demo accounts cannot upload files. The demo instructor can still create courses and lessons, so occasionally clear test content from the database.
+
+```bash
+DEMO_MODE=true SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+```
+
 ### Connect the frontend
 
 In `skillverse-ui`, set:
@@ -316,6 +349,8 @@ Configuration is read from environment variables (or a local `.env`, which is gi
 | `PAYHERE_MERCHANT_ID`, `PAYHERE_MERCHANT_SECRET` | all | for payments | Used to verify PayHere notifications. If blank, every notification is rejected |
 | `ENROLLMENT_REQUIRE_PAYMENT` | all | no | `true` = paid courses need a successful payment before enrolment. Default `false` |
 | `SEED_PASSWORD` | `dev`, `test` | no | Password for seeded sample accounts. Default `password123` |
+| `DEMO_MODE` | all | no | `true` seeds the public demo accounts and data and publishes their credentials. Default `false` |
+| `DEMO_PASSWORD` | all | no | Shared password of the three demo accounts. Public by design. Default `Demo@2026` |
 | `CORS_ALLOWED_ORIGINS` | property files | no | Comma-separated UI origins |
 
 Generate a JWT secret:
@@ -347,7 +382,7 @@ What is in place:
 - The acting user always comes from the JWT, never from request parameters.
 - **Server-side pricing:** payment amounts and order-item prices are taken from the course; client-supplied amounts are ignored.
 - **PayHere notifications** are public (the provider sends no JWT) but must carry a valid `md5sig` computed with the merchant secret. Checks: signature and merchant ID, known `order_id`, amount equals the stored payment amount. Handling is idempotent — a payment that already succeeded is never changed or enrolled twice. With no merchant credentials configured, all notifications are rejected.
-- Sample accounts are created only in the `dev` and `test` profiles.
+- Sample accounts are created only in the `dev` and `test` profiles. The separate, opt-in [demo mode](#demo-mode-sandbox-showcase) exposes three public accounts with limits (read-only administrator, no uploads).
 - `password_hash` and verification tokens are never serialized.
 - Bean Validation on request DTOs; JPA parameter binding (no string-built SQL).
 - Swagger/OpenAPI disabled outside `dev` and `test`.
@@ -412,6 +447,8 @@ Tests run against the `test` profile (in-memory H2) with the seeded accounts and
 | Test class | Covers |
 |---|---|
 | `SecurityHardeningIntegrationTest` | Role and ownership rules, server-side pricing, lesson access, PayHere notification handling (invalid signature, wrong amount, success, duplicate/downgrade) |
+| `DemoModeIntegrationTest` | Published demo credentials, seeded showcase data, read-only demo administrator, upload block, idempotent seeding |
+| `DemoControllerTest` | Nothing is published while demo mode is off |
 | `PayHereSignatureServiceTest` | `md5sig` verification and fail-closed behaviour |
 | `EnrollmentPaymentRuleTest` | Payment-required enrollment rule; seeder restricted to `dev`/`test` |
 | `SkillverseV2ApplicationTests` | Application context loads |
@@ -431,6 +468,7 @@ skillverse-v2/
 │   ├── DataSeeder.java                # sample data (dev/test profiles only)
 │   ├── DataInitializationConfig.java  # payment-method reference data
 │   ├── config/                        # Security, CORS, OpenAPI
+│   ├── demo/                          # opt-in demo mode: accounts endpoint, seeder, read-only guard
 │   ├── controller/                    # REST controllers
 │   ├── dto/                           # request / response objects
 │   ├── exception/                     # custom exceptions + global handler
