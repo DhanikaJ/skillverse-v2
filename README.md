@@ -1,411 +1,477 @@
 # SkillVerse v2 — Backend API
 
-**SkillVerse v2** is the backend service for the SkillVerse online learning platform. It provides RESTful APIs for authentication, course management, cart and checkout workflows, learner enrollment, lesson access, purchase history, instructor operations, and administrative reporting.
+REST API for **SkillVerse**, an online learning platform. Built with Spring Boot as a hands-on project to practise layered architecture, JWT security, relational modelling and third-party integrations (Cloudinary, PayHere).
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white)](https://expressjs.com/)
-<img alt="JPA" src="https://img.shields.io/badge/JPA-Hibernate-blue">
-<img alt="Maven" src="https://img.shields.io/badge/Maven-Build-red">
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![REST API](https://img.shields.io/badge/API-REST-02569B?logo=api&logoColor=white)](https://restfulapi.net/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Java](https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2.5-6DB33F?logo=springboot&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-Build-C71A36?logo=apachemaven&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)
+![OpenAPI](https://img.shields.io/badge/OpenAPI-Swagger-85EA2D?logo=swagger&logoColor=black)
 
-## Frontend Repository
+| | |
+|---|---|
+| **Frontend** | [DhanikaJ/skillverse-ui](https://github.com/DhanikaJ/skillverse-ui) · [live demo](https://skillverse-ui.vercel.app/) |
+| **Status** | Sandbox / learning project |
+| **API base path** | `/api/v1` (default port `8080`) |
 
-This backend powers the SkillVerse frontend client:
+---
 
-**Frontend:** [DhanikaJ/skillverse-ui](https://github.com/DhanikaJ/skillverse-ui)
+## Table of contents
 
-The frontend and backend are separate cross-origin applications. The backend must allow requests from the frontend origin through CORS and expose a stable JSON API contract.
+1. [Features](#features)
+2. [Tech stack](#tech-stack)
+3. [Architecture](#architecture)
+4. [Screenshots](#screenshots)
+5. [API reference](#api-reference)
+6. [Getting started](#getting-started)
+7. [Configuration](#configuration)
+8. [Security model](#security-model)
+9. [Design decisions](#design-decisions)
+10. [Deployment](#deployment)
+11. [Testing](#testing)
+12. [Project structure](#project-structure)
+13. [Roadmap](#roadmap)
+14. [License](#license)
 
-## Overview
-
-SkillVerse v2 handles the server-side logic for the SkillVerse learning platform. It receives requests from the React frontend, validates user input, applies business rules, manages persistent data, and returns structured JSON responses.
-
-The service is designed as a standalone API so it can support the current React frontend as well as future clients such as mobile applications, administrative dashboards, or third-party integrations.
+---
 
 ## Features
 
-### Authentication and Users
+**Implemented**
 
-- User registration
-- User login and session authentication
-- Token-based authorization
-- Role-based access for learners, instructors, and administrators
-- Secure password storage
+- **Authentication** — registration and login return a signed JWT; `GET /auth/me` resolves the current user. Passwords are stored with BCrypt.
+- **Roles and ownership** — `STUDENT`, `INSTRUCTOR`, `ADMIN`, enforced with method-level security and per-resource ownership checks.
+- **Courses** — paginated listing, detail lookup and creation, with Bean Validation on request bodies.
+- **Enrollment** — enrol the current user, list "my" enrollments, list by user or by course; duplicate enrollment is rejected.
+- **Lessons** — full CRUD nested under a course.
+- **Quizzes** — create quizzes and fetch their questions.
+- **Orders and payments** — order and order-item records, payments priced from the course, and a signature-verified PayHere notification endpoint that enrols the learner when a payment succeeds.
+- **File upload** — multipart upload to Cloudinary, 10 MB limit.
+- **Admin** — user listing and course/enrollment statistics.
+- **Centralised error handling** — `GlobalExceptionHandler` maps validation, not-found and state errors to an `ErrorResponse` shape.
+- **API docs** — OpenAPI 3 / Swagger UI (development and test profiles).
+- **Seed data** — sample users, courses and enrollments for development and tests (never in production).
 
-### Courses and Learning
+**Modelled, endpoints not yet exposed:** cart, certificates, reviews, quiz attempts.
 
-- Course listing and retrieval
-- Course detail endpoints
-- Lesson and learning-content access
-- Enrollment management
-- Learner dashboard data
-- Purchase history
+---
 
-### Commerce
-
-- Shopping-cart operations
-- Checkout workflow
-- Order and purchase records
-- Payment integration support
-
-### Instructor and Admin
-
-- Instructor course-management endpoints
-- Administrative reporting endpoints
-- Platform activity and business reporting data
-
-## Technology Stack
+## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Runtime | Node.js |
-| Web framework | Express.js |
-| Language | JavaScript |
-| API style | RESTful JSON API |
-| Authentication | JWT |
-| Database | PostgreSQL / MySQL / MongoDB, depending on project configuration |
-| CORS | Cross-Origin Resource Sharing middleware |
-| Environment configuration | dotenv |
-| Deployment | Render, Railway, Fly.io, AWS, or VPS |
-| License | MIT License |
+| Language / runtime | Java 17 |
+| Framework | Spring Boot 3.2.5 (Web, Data JPA, Security, Validation) |
+| Database | PostgreSQL (H2 in-memory for the `test` profile) |
+| ORM | Hibernate / Spring Data JPA |
+| Security | Spring Security, JWT (jjwt 0.11.5, HS256), BCrypt |
+| API docs | springdoc-openapi 2.5.0 |
+| File storage | Cloudinary |
+| Payments | PayHere (sandbox-oriented integration) |
+| Config | `.env` loading via java-dotenv, Spring profiles |
+| Build | Maven Wrapper |
+| Containers | Docker Compose (local PostgreSQL) |
+| Hosting | Railway (API), Vercel (UI) |
+
+---
 
 ## Architecture
 
 ```text
-SkillVerse UI (React Frontend)
-              │
-              ▼
-        CORS Middleware
-              │
-              ▼
-       Express API Layer
-              │
-              ├── Authentication Middleware
-              ├── Route Controllers
-              ├── Business Services
-              ├── Data Access Layer
-              └── Database
+ React UI (Vercel)
+        │  HTTPS + JSON, Authorization: Bearer <JWT>
+        ▼
+ ┌──────────────────────────────────────────────────────────┐
+ │ Spring Security filter chain                             │
+ │   CORS → JwtAuthFilter → method security (@PreAuthorize) │
+ └───────────────┬──────────────────────────────────────────┘
+                 ▼
+         Controllers  ── DTOs / EntityMapper ──┐
+                 ▼                             │
+          Services (@Transactional)            │  GlobalExceptionHandler
+                 ▼                             │  → ErrorResponse
+       Spring Data repositories ◄──────────────┘
+                 ▼
+            PostgreSQL            Cloudinary (uploads)   PayHere (webhooks)
 ```
 
-# 🖼️ Screenshots
+Packages follow the layers: `controller` → `service` → `repository` → `model`, with `dto` and `mapper` isolating the API contract from the entities, and `config`, `security` and `exception` for cross-cutting concerns.
 
-<b>Postman<b/>
+---
 
-<img alt="Postman Create User" src="docs/postman_create_user.png">
-<img alt="Postman Create Course" src="docs/postman_create_course.png">
-<img alt="Postman Enrollment" src="docs/postman-enrollment.png">
+## Screenshots
 
-<b>Database<b/>
+**Swagger UI**
 
-<img alt="Postgre tables" src="docs/db-tables.png">
-<img alt="Postgre Course" src="docs/db-courses.png">
-
-### Swagger UI
 ![Swagger UI](docs/swagger.png)
 
-## Project Structure
+**Postman**
 
-```text
-skillverse-v2/
-├── src/
-│   ├── config/             # Database, environment, and app configuration
-│   ├── controllers/        # Request handlers
-│   ├── middleware/         # Authentication, authorization, error handling
-│   ├── models/             # Database models and schemas
-│   ├── routes/             # API route definitions
-│   ├── services/           # Business logic
-│   ├── utils/              # Helper functions
-│   ├── app.js              # Express application setup
-│   └── server.js           # Server entry point
-├── .env                    # Local environment variables
-├── package.json            # Dependencies and scripts
-└── README.md               # Project documentation
-```
+<img alt="Postman — create user" src="docs/postman_create_user.png">
+<img alt="Postman — create course" src="docs/postman_create_course.png">
+<img alt="Postman — enrollment" src="docs/postman-enrollment.png">
 
-## API Base URL
+**Database (PostgreSQL)**
 
-Local development:
+<img alt="PostgreSQL tables" src="docs/db-tables.png">
+<img alt="PostgreSQL courses table" src="docs/db-courses.png">
 
-```text
-http://localhost:5000/api
-```
+---
 
-Production:
+## API reference
 
-```text
-[https://your-backend-domain.com/api](https://your-backend-domain.com/api)
-```
+Base URL: `http://localhost:8080/api/v1`. Interactive docs are served at `/swagger-ui.html` when the `dev` profile is active.
 
-## API Endpoints
+**Access legend:** *Public* = no token · *Auth* = any valid JWT · *Role* = JWT with the listed role.
 
-| Method | Endpoint | Description | Access |
+### Auth
+
+| Method | Path | Description | Access |
 |---|---|---|---|
-| `POST` | `/api/auth/register` | Register a new user | Public |
-| `POST` | `/api/auth/login` | Authenticate a user | Public |
-| `GET` | `/api/auth/me` | Get authenticated user profile | Authenticated |
-| `GET` | `/api/courses` | Retrieve available courses | Public |
-| `GET` | `/api/courses/:id` | Retrieve course details | Public |
-| `GET` | `/api/cart` | Retrieve the user’s cart | Authenticated |
-| `POST` | `/api/cart` | Add a course to the cart | Authenticated |
-| `DELETE` | `/api/cart/:id` | Remove an item from the cart | Authenticated |
-| `POST` | `/api/checkout` | Process a checkout request | Authenticated |
-| `GET` | `/api/my-learning` | Retrieve enrolled courses | Authenticated |
-| `GET` | `/api/lessons/:id` | Retrieve lesson content | Authenticated |
-| `GET` | `/api/purchases` | Retrieve purchase history | Authenticated |
-| `GET` | `/api/instructor/courses` | Retrieve instructor courses | Instructor |
-| `GET` | `/api/admin/reports` | Retrieve administrative reports | Admin |
+| `POST` | `/auth/register` | Create a `STUDENT` account, returns a JWT | Public |
+| `POST` | `/auth/login` | Authenticate, returns a JWT | Public |
+| `GET` | `/auth/me` | Current user profile | Auth |
 
-> Adjust paths and methods to match the actual route definitions in `src/routes/`.
+Request body for register/login: `{ "email": "…", "password": "…" }`
+Response: `{ "success": true, "message": "…", "token": "…", "type": "Bearer", "email": "…", "role": "STUDENT" }`
 
-## Prerequisites
+### Courses
 
-- Node.js 18 or later
-- npm or yarn
-- Git
-- A configured database
-- A frontend client, preferably [SkillVerse UI](https://github.com/DhanikaJ/skillverse-ui)
+| Method | Path | Description | Access |
+|---|---|---|---|
+| `GET` | `/courses?page=0&size=10` | Paginated course list | `STUDENT`, `INSTRUCTOR`, `ADMIN` |
+| `GET` | `/courses/{id}` | Course detail | `STUDENT`, `INSTRUCTOR`, `ADMIN` |
+| `POST` | `/courses` | Create a course (the caller becomes its instructor) | `INSTRUCTOR`, `ADMIN` |
 
-## Installation
+### Enrollments
 
-Clone the backend repository:
+| Method | Path | Description | Access |
+|---|---|---|---|
+| `POST` | `/enroll/{courseId}` | Enrol the current user (see [Enrollment policy](#enrollment-policy)) | Auth |
+| `GET` | `/users/me/enrollments` | Current user's enrollments | Auth |
+| `POST` | `/enrollments/enroll/{studentId}/{courseId}` | Enrol a given student | `ADMIN` |
+| `GET` | `/enrollments/user/{userId}` | Enrollments for a user | That user or `ADMIN` |
+| `GET` | `/enrollments/course/{courseId}` | Enrollments for a course | Course instructor or `ADMIN` |
+
+### Lessons
+
+| Method | Path | Description | Access |
+|---|---|---|---|
+| `POST` | `/courses/{courseId}/lessons` | Add a lesson | Course instructor or `ADMIN` |
+| `GET` | `/courses/{courseId}/lessons` | List lessons | Enrolled learner, course instructor or `ADMIN` |
+| `GET` | `/courses/{courseId}/lessons/{lessonId}` | Lesson detail | Enrolled learner, course instructor or `ADMIN` |
+| `PUT` | `/courses/{courseId}/lessons/{lessonId}` | Update a lesson | Course instructor or `ADMIN` |
+| `DELETE` | `/courses/{courseId}/lessons/{lessonId}` | Delete a lesson | Course instructor or `ADMIN` |
+
+### Quizzes
+
+| Method | Path | Description | Access |
+|---|---|---|---|
+| `POST` | `/quizzes` | Create a quiz for a course | Course instructor or `ADMIN` |
+| `GET` | `/quizzes/{id}/questions` | Questions for a quiz | Enrolled learner, course instructor or `ADMIN` |
+
+### Orders and payments
+
+| Method | Path | Description | Access |
+|---|---|---|---|
+| `POST` | `/orders` | Create an order for the caller (`?userId=` is honoured for admins only) | Auth |
+| `POST` | `/orders/{orderId}/items?courseId=` | Add a course to a pending order; price is the course price | Order owner or `ADMIN` |
+| `GET` | `/orders/{orderId}` | Order detail | Order owner or `ADMIN` |
+| `GET` | `/orders/user/{userId}` | Orders of a user | That user or `ADMIN` |
+| `GET` | `/orders?status=` | All orders | `ADMIN` |
+| `PUT` | `/orders/{orderId}?status=` | Update order status | `ADMIN` |
+| `POST` | `/payments/initiate` | Start a payment: body `{ "courseId", "paymentMethod" }`; payer from JWT, amount from course | Auth |
+| `POST` | `/payments/webhook/payhere` | PayHere notification (`application/x-www-form-urlencoded`); alias `/payments/webhook/payhere-detailed` | Public, authenticated by `md5sig` |
+| `GET` | `/payments/{id}` · `/payments/txn/{ref}` | Read one payment | Payment owner or `ADMIN` |
+| `GET` | `/payments/user/{userId}` | Payments of a user | That user or `ADMIN` |
+| `GET` | `/payments` | All payments | `ADMIN` |
+
+### Users, admin, files, health
+
+| Method | Path | Description | Access |
+|---|---|---|---|
+| `GET` | `/users/{id}` | User by ID | That user or `ADMIN` |
+| `POST` | `/users` | Create a user record | `ADMIN` |
+| `GET` | `/users/admin/users?page=0&size=10` | Paginated users | `ADMIN` |
+| `GET` | `/admin/users` | All users | `ADMIN` |
+| `GET` | `/admin/courses/stats` | Course and enrollment totals | `ADMIN` |
+| `POST` | `/upload` | Multipart upload (`file`: image, video or PDF) → Cloudinary URL | `INSTRUCTOR`, `ADMIN` |
+| `GET` | `/` · `/hello` *(outside `/api/v1`)* | Health check | Public |
+
+### Error format
+
+```json
+{
+  "error": "Not Found",
+  "status": 404,
+  "message": "Course not found with ID: 42",
+  "timestamp": "2026-01-01T10:00:00",
+  "path": "/api/v1/courses/42"
+}
+```
+
+---
+
+## Getting started
+
+### Prerequisites
+
+- JDK 17
+- Docker (for the local PostgreSQL container) — or any PostgreSQL 14+ instance
+- Optional: a Cloudinary account (only needed to exercise `/upload`)
+
+### Run locally
 
 ```bash
-git clone [https://github.com/DhanikaJ/skillverse-v2.git](https://github.com/DhanikaJ/skillverse-v2.git)
+git clone https://github.com/DhanikaJ/skillverse-v2.git
 cd skillverse-v2
 ```
 
-Install dependencies:
-
-```bash
-npm install
-```
-
-## Environment Configuration
-
-Create a `.env` file in the backend root:
+Create a `.env` file in the project root. Docker Compose and the `dev` profile both read these values, so one password covers the container and the app:
 
 ```env
-NODE_ENV=development
-PORT=5000
-
-DATABASE_URL=your_database_connection_string
-JWT_SECRET=your_secure_jwt_secret
-JWT_EXPIRES_IN=1d
-
-CORS_ORIGIN=http://localhost:5173
+POSTGRES_USER=skillverse
+POSTGRES_PASSWORD=choose-a-local-password
+POSTGRES_DB=skillverse-v2
 ```
 
-For a deployed frontend, update CORS:
+The full list of supported variables (JWT, Cloudinary, CORS, production database) is in [Configuration](#configuration).
+
+Start PostgreSQL (published on host port **5332**):
+
+```bash
+docker compose up -d
+```
+
+Run the API with the `dev` profile:
+
+```bash
+SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE = "dev"; .\mvnw.cmd spring-boot:run
+```
+
+The API is now at `http://localhost:8080` and Swagger UI at `http://localhost:8080/swagger-ui.html`.
+
+### Try it
+
+```bash
+# register
+curl -X POST http://localhost:8080/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"you@example.com","password":"a-strong-password"}'
+
+# use the returned token
+curl http://localhost:8080/api/v1/courses \
+  -H "Authorization: Bearer <token>"
+```
+
+### Seed data (development and test only)
+
+With the `dev` or `test` profile, `DataSeeder` inserts sample users, courses and enrollments if they do not already exist:
+
+| Role | Accounts |
+|---|---|
+| `ADMIN` | `admin@example.com` |
+| `INSTRUCTOR` | `instructor@example.com`, `dr.smith@skillverse.com`, `prof.jones@skillverse.com` |
+| `STUDENT` | `student@example.com`, `alice.student@example.com`, `bob.tester@example.com`, `charlie.learner@example.com` |
+
+All sample accounts share the password in `SEED_PASSWORD` (default `password123` in the `dev` and `test` profiles only). Set `SEED_PASSWORD` in `.env` to use your own.
+
+**Seeding never runs in the default or `prod` profile.** Only the payment-method reference data is created in every environment.
+
+### Connect the frontend
+
+In `skillverse-ui`, set:
 
 ```env
-CORS_ORIGIN=[https://your-frontend-domain.com](https://your-frontend-domain.com)
+VITE_API_BASE_URL=http://localhost:8080/api/v1
 ```
 
-For multiple allowed frontend origins, configure an array in the application code:
+Add the UI origin (default `http://localhost:5173`) to the backend CORS configuration — see [Configuration](#configuration).
 
-```javascript
-const allowedOrigins = process.env.CORS_ORIGIN.split(",");
+---
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-);
-```
+## Configuration
 
-Then use:
+Configuration is read from environment variables (or a local `.env`, which is git-ignored).
 
-```env
-CORS_ORIGIN=http://localhost:5173,[https://your-frontend-domain.com](https://your-frontend-domain.com)
-```
+| Variable | Used in | Required | Description |
+|---|---|---|---|
+| `SPRING_PROFILES_ACTIVE` | all | yes (`dev` locally, `prod` when deployed) | Selects the property file |
+| `DATABASE_URL` | default, `dev` | no | JDBC URL. Default `jdbc:postgresql://localhost:5332/skillverse-v2` |
+| `DB_USERNAME`, `DB_PASSWORD` | default, `dev` | yes | `dev` falls back to `POSTGRES_USER` / `POSTGRES_PASSWORD` |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Docker Compose, `dev` | yes (password) | Credentials for the local container |
+| `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD` | `prod` | yes | Supplied by the managed PostgreSQL service |
+| `JWT_SECRET` | all | yes (`prod`) | Signing key, at least 32 random bytes |
+| `JWT_EXPIRATION` | all | yes (`prod`) | Token lifetime in milliseconds (`86400000` = 24 h) |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | all | for uploads | Cloudinary credentials |
+| `PORT` | `prod` | no | HTTP port, default `8080` |
+| `PAYHERE_MERCHANT_ID`, `PAYHERE_MERCHANT_SECRET` | all | for payments | Used to verify PayHere notifications. If blank, every notification is rejected |
+| `ENROLLMENT_REQUIRE_PAYMENT` | all | no | `true` = paid courses need a successful payment before enrolment. Default `false` |
+| `SEED_PASSWORD` | `dev`, `test` | no | Password for seeded sample accounts. Default `password123` |
+| `CORS_ALLOWED_ORIGINS` | property files | no | Comma-separated UI origins |
 
-## Running the Backend
-
-Development mode:
+Generate a JWT secret:
 
 ```bash
-npm run dev
+openssl rand -base64 48
 ```
 
-Production mode:
+**Profiles**
 
-```bash
-npm start
-```
+| Profile | Database | Swagger | Notes |
+|---|---|---|---|
+| *(default)* | PostgreSQL | off | Requires `DB_PASSWORD`, `JWT_SECRET`, Cloudinary variables |
+| `dev` | PostgreSQL | on | SQL logging, development defaults |
+| `test` | H2 in-memory | on | `create-drop` schema |
+| `prod` | PostgreSQL via `PG*` | off | Quiet logging, JDBC batching |
 
-The API should be available at:
+> **CORS:** allowed origins are currently defined in `config/CorsConfig.java` (`/api/v1/**`). Add your local UI origin there for development. Binding this to `CORS_ALLOWED_ORIGINS` is on the roadmap.
 
-```text
-http://localhost:5000
-```
+---
 
-## Connecting the Frontend
+## Security model
 
-In the frontend repository, set:
+What is in place:
 
-```env
-VITE_API_BASE_URL=http://localhost:5000/api
-```
+- Stateless sessions; JWT verified on every request by `JwtAuthFilter`.
+- BCrypt password hashing; secrets supplied through environment variables and excluded from version control.
+- Role-based method security (`@PreAuthorize`) plus object-level rules in `AccessPolicy`: users reach only their own orders, payments, enrollments and profile; instructors manage only their own courses, lessons and quizzes; lesson and quiz content requires enrollment; administrators have full access. Denials return `403` with a JSON `ErrorResponse`.
+- The acting user always comes from the JWT, never from request parameters.
+- **Server-side pricing:** payment amounts and order-item prices are taken from the course; client-supplied amounts are ignored.
+- **PayHere notifications** are public (the provider sends no JWT) but must carry a valid `md5sig` computed with the merchant secret. Checks: signature and merchant ID, known `order_id`, amount equals the stored payment amount. Handling is idempotent — a payment that already succeeded is never changed or enrolled twice. With no merchant credentials configured, all notifications are rejected.
+- Sample accounts are created only in the `dev` and `test` profiles.
+- `password_hash` and verification tokens are never serialized.
+- Bean Validation on request DTOs; JPA parameter binding (no string-built SQL).
+- Swagger/OpenAPI disabled outside `dev` and `test`.
 
-Then start the frontend:
+### Enrollment policy
 
-```bash
-npm run dev
-```
+`POST /enroll/{courseId}` lets any authenticated user join a course directly, which keeps the sandbox demo usable without a payment account. Set `ENROLLMENT_REQUIRE_PAYMENT=true` to require a successful payment for any course with a price above zero.
 
-Verify the connection by opening the frontend, registering or logging in, and confirming that course data loads from the backend.
+### Still planned
 
-## CORS Configuration
+This is a learning project, and some areas remain scoped down:
 
-Because SkillVerse UI and SkillVerse v2 run on separate origins, CORS must be enabled on this backend.
+- Rate limiting, uniform authentication error responses and password rules.
+- Lesson and quiz endpoints still return entities rather than DTOs.
+- Monetary values use `double` rather than `BigDecimal`.
+- PayHere currency is not checked, and the integration has been exercised only against locally computed signatures, not the PayHere sandbox.
 
-Example Express configuration:
+---
 
-```javascript
-const cors = require("cors");
+## Design decisions
 
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-  })
-);
-```
+| Decision | Rationale |
+|---|---|
+| **Stateless JWT** instead of server sessions | Fits a separately hosted SPA and keeps the API horizontally scalable. |
+| **DTO + mapper layer** between controllers and entities | Keeps the API contract stable, avoids lazy-loading and serialization problems, and prevents accidental exposure of entity fields. Applied to users, courses, enrollments, orders and payments; lessons and quizzes are next. |
+| **Service layer with `@Transactional` boundaries** | Business rules and transaction handling live outside the controllers. |
+| **Method-level security (`@PreAuthorize`)** on top of a URL-level default | Authorization rules sit beside the code they protect. |
+| **Spring profiles for environments** | One codebase with distinct database, logging and documentation behaviour for dev, test and prod. |
+| **Externalised configuration** | Secrets and environment-specific values are injected at runtime; `.env.example` documents what is required. |
+| **Central exception handler with a typed error body** | Predictable error handling for the client. |
+| **Provider-hosted media (Cloudinary)** | Keeps binary storage out of the application and database. |
+| **Separate UI and API deployments** | Independent release cycles; CORS restricted to known origins. |
+| **OpenAPI generated from code** | Documentation stays in step with controllers. |
 
-For local development, the frontend origin is commonly:
+---
 
-```text
-http://localhost:5173
-```
+## Deployment
 
-For production, use the exact deployed frontend domain, including the protocol:
+The API is configured for a container/PaaS host (Railway) with a managed PostgreSQL instance; the UI is deployed on Vercel.
 
-```text
-[https://skillverse-ui.example.com](https://skillverse-ui.example.com)
-```
+1. Provision PostgreSQL and expose `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`.
+2. Set `SPRING_PROFILES_ACTIVE=prod`, `JWT_SECRET`, `JWT_EXPIRATION`, and the `CLOUDINARY_*` variables.
+3. Build and run:
+   ```bash
+   ./mvnw clean package -DskipTests
+   java -jar target/skillverse-v2-0.0.1-SNAPSHOT.jar
+   ```
+4. Point the UI's `VITE_API_BASE_URL` at `https://<api-host>/api/v1` and make sure the UI origin is allowed by CORS.
 
-## Database Setup
+> The schema is managed with Hibernate `ddl-auto=update`. `recreate-tables.sql` drops every table — use it only on a disposable development database.
 
-Configure the database connection using `DATABASE_URL`.
-
-Example PostgreSQL connection string:
-
-```env
-DATABASE_URL=postgresql://username:password@localhost:5432/skillverse
-```
-
-Example MongoDB connection string:
-
-```env
-DATABASE_URL=mongodb://localhost:27017/skillverse
-```
-
-If the project includes migration or seeding scripts, run them according to the configured scripts in `package.json`, for example:
-
-```bash
-npm run migrate
-npm run seed
-```
-
-## Build and Deployment
-
-Install production dependencies:
-
-```bash
-npm ci --omit=dev
-```
-
-Start the service:
-
-```bash
-npm start
-```
-
-Recommended production checklist:
-
-- Use HTTPS only.
-- Store secrets in the hosting platform’s environment variables.
-- Use a managed database with automated backups.
-- Enable request logging and error monitoring.
-- Configure rate limiting for authentication endpoints.
-- Restrict CORS to the production frontend domain.
-- Use a process manager or container orchestration system.
-- Run database migrations before deployment.
-- Remove development-only dependencies from production builds.
-
-## Security Considerations
-
-- Hash passwords using bcrypt or Argon2.
-- Use strong, randomly generated JWT secrets.
-- Apply authentication middleware to protected routes.
-- Enforce role-based authorization for instructor and admin endpoints.
-- Validate and sanitize all request data.
-- Use parameterized queries or ORM-safe query methods to prevent SQL injection.
-- Protect against NoSQL injection when using MongoDB.
-- Implement CSRF protection where cookie-based authentication is used.
-- Apply rate limiting and account lockout mechanisms.
-- Keep dependencies updated and scan for vulnerabilities.
+---
 
 ## Testing
 
-Run the test suite if configured:
-
 ```bash
-npm test
+./mvnw test
 ```
 
-Recommended test coverage:
+Tests run against the `test` profile (in-memory H2) with the seeded accounts and need no external services.
 
-- Authentication and authorization flows
-- Course retrieval and enrollment
-- Cart and checkout workflows
-- Role-based access control
-- Input validation and error responses
-- Database service methods
+| Test class | Covers |
+|---|---|
+| `SecurityHardeningIntegrationTest` | Role and ownership rules, server-side pricing, lesson access, PayHere notification handling (invalid signature, wrong amount, success, duplicate/downgrade) |
+| `PayHereSignatureServiceTest` | `md5sig` verification and fail-closed behaviour |
+| `EnrollmentPaymentRuleTest` | Payment-required enrollment rule; seeder restricted to `dev`/`test` |
+| `SkillverseV2ApplicationTests` | Application context loads |
+
+PowerShell scripts in the repository root (`test-api.ps1`, `test-all-endpoints.ps1`, …) were written for the pre-authentication API and need a JWT to be useful now.
+
+Planned: tests for the remaining endpoints, PostgreSQL Testcontainers, and a CI workflow.
+
+---
+
+## Project structure
+
+```text
+skillverse-v2/
+├── src/main/java/com/skillverse/
+│   ├── SkillverseV2Application.java   # entry point, .env loading
+│   ├── DataSeeder.java                # sample data (dev/test profiles only)
+│   ├── DataInitializationConfig.java  # payment-method reference data
+│   ├── config/                        # Security, CORS, OpenAPI
+│   ├── controller/                    # REST controllers
+│   ├── dto/                           # request / response objects
+│   ├── exception/                     # custom exceptions + global handler
+│   ├── mapper/                        # entity ↔ DTO mapping
+│   ├── model/                         # JPA entities and enums
+│   ├── repository/                    # Spring Data repositories
+│   ├── security/                      # JwtUtil, JwtAuthFilter, AccessPolicy
+│   └── service/                       # business logic
+├── src/main/resources/
+│   ├── application.properties         # base configuration
+│   └── application-{dev,test,prod}.properties
+├── src/test/                          # tests
+├── docs/                              # screenshots and project documents
+├── docker-compose.yml                 # local PostgreSQL
+├── .env.example                       # environment template
+└── pom.xml
+```
+
+---
 
 ## Roadmap
 
-- Complete API integration tests
-- Add refresh-token authentication
-- Implement payment-provider webhooks
-- Add course progress tracking
-- Add instructor analytics endpoints
-- Add course reviews and ratings
-- Add notification and email services
-- Add API documentation using Swagger or OpenAPI
-- Add Docker and CI/CD deployment workflows
+- [x] Ownership checks and role rules on orders, payments, enrollments, lessons, quizzes and uploads
+- [x] PayHere signature verification and idempotent confirmation
+- [x] Server-side pricing; seed data limited to `dev`/`test`
+- [ ] Verify the PayHere flow end to end in the PayHere sandbox
+- [ ] Cart and checkout endpoints
+- [ ] Bind CORS origins to configuration
+- [ ] Flyway migrations
+- [ ] Automated test suite and CI pipeline
+- [ ] Refresh tokens
+- [ ] Course reviews, certificates and progress tracking endpoints
+- [ ] `BigDecimal` for monetary values
+- [ ] Notification / email service
 
-## Contributing
-
-1. Fork the repository.
-2. Create a feature branch:
-
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-3. Commit changes:
-
-   ```bash
-   git commit -m "feat: add course progress endpoint"
-   ```
-
-4. Push the branch:
-
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-5. Open a pull request.
+---
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+Released under the [MIT License](LICENSE).
 
 ## Author
 
-**DhanikaJ**  
-Portforlio: [DhanikaJ](https://DhanikaJ.dev)
+**DhanikaJ** — [portfolio](https://DhanikaJ.dev) · [GitHub](https://github.com/DhanikaJ)
