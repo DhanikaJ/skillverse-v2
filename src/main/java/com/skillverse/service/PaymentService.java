@@ -1,23 +1,33 @@
 package com.skillverse.service;
 
+import com.skillverse.exception.ResourceNotFoundException;
+import com.skillverse.exception.ValidationException;
 import com.skillverse.model.*;
 import com.skillverse.repository.PaymentRepository;
 import com.skillverse.repository.PaymentMethodRepository;
 import com.skillverse.repository.EnrollmentRepository;
 import com.skillverse.repository.UsersRepository;
 import com.skillverse.repository.CourseRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Service class for managing Payment operations.
- * Provides functionality for creating payments, confirming payments, and managing payment records.
+ * Payments are created for the authenticated user at the course's server-side price and are
+ * confirmed only through verified provider notifications.
  */
 @Service
 public class PaymentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
+    private static final String DEFAULT_PAYMENT_METHOD = "PayHere";
+    private static final double AMOUNT_TOLERANCE = 0.005;
 
     private final PaymentRepository paymentRepository;
     private final PaymentMethodRepository paymentMethodRepository;
@@ -40,32 +50,46 @@ public class PaymentService {
     }
 
     /**
-     * Creates a new payment record.
+     * Creates a pending payment for a user and course.
+     * The amount is always taken from the course price, never from the client.
      *
-     * @param userId the ID of the user making the payment
+     * @param user the authenticated user making the payment
      * @param courseId the ID of the course being purchased
-     * @param amount the payment amount
-     * @param paymentMethodName the name of the payment method
+     * @param paymentMethodName an existing payment method name (defaults to PayHere when blank)
      * @return the created Payment entity
-     * @throws RuntimeException if the user or course is not found
+     * @throws ResourceNotFoundException if the course does not exist
+     * @throws ValidationException if the course is free, already owned, or the method is unsupported
      */
     @Transactional
-    public Payment createPayment(Integer userId, Integer courseId, Double amount, String paymentMethodName) {
-        Users user = findUserById(userId);
-        Course course = findCourseById(courseId);
-        PaymentMethod paymentMethod = findOrCreatePaymentMethod(paymentMethodName);
+    public Payment createPayment(Users user, Integer courseId, String paymentMethodName) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with ID: " + courseId));
+
+        if (enrollmentRepository.existsByUser_IdAndCourse_Id(user.getId(), course.getId())) {
+            throw new ValidationException("Already enrolled in this course");
+        }
+        if (course.getPrice() <= 0) {
+            throw new ValidationException("This course is free; enrol directly instead of paying");
+        }
+
+        String methodName = (paymentMethodName == null || paymentMethodName.isBlank())
+                ? DEFAULT_PAYMENT_METHOD
+                : paymentMethodName.trim();
+        PaymentMethod paymentMethod = paymentMethodRepository.findByMethod(methodName);
+        if (paymentMethod == null) {
+            throw new ValidationException("Unsupported payment method: " + methodName);
+        }
 
         Payment payment = new Payment();
         payment.setUser(user);
         payment.setCourse(course);
-        payment.setAmount(amount);
+        payment.setAmount(course.getPrice());
         payment.setPaymentMethod(paymentMethod);
         payment.setStatus("PENDING");
+        payment.setTxnReference("SV-" + UUID.randomUUID());
         payment.setCreated_at(new Date());
 
-        Payment savedPayment = paymentRepository.save(payment);
-        savedPayment.setTxnReference(savedPayment.getId().toString());
-        return paymentRepository.save(savedPayment);
+        return paymentRepository.save(payment);
     }
 
     /**
@@ -80,22 +104,37 @@ public class PaymentService {
     }
 
     /**
-     * Confirms a payment and enrolls the student in the course if payment is successful.
+     * Applies a verified provider notification to a payment.
      *
-     * @param txnReference the transaction reference
-     * @param status the payment status
-     * @return the updated Payment entity
-     * @throws RuntimeException if the payment is not found
+     * The notification is idempotent: a payment that already succeeded is never changed again,
+     * so retries and duplicate deliveries cannot downgrade it or enrol twice. The notified
+     * amount must match the stored amount.
+     *
+     * @param txnReference the transaction reference (PayHere {@code order_id})
+     * @param status the new status
+     * @param notifiedAmount the amount reported by the provider
+     * @return the resulting Payment entity
+     * @throws ResourceNotFoundException if the payment does not exist
+     * @throws ValidationException if the notified amount does not match
      */
     @Transactional
-    public Payment confirmPayment(String txnReference, String status) {
+    public Payment confirmPayment(String txnReference, String status, double notifiedAmount) {
         Payment payment = paymentRepository.findByTxnReference(txnReference)
-                .orElseThrow(() -> new RuntimeException("Payment not found with txn_reference: " + txnReference));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found for reference: " + txnReference));
+
+        if (isPaymentSuccessful(payment.getStatus())) {
+            logger.info("Payment {} already completed; ignoring duplicate notification", payment.getId());
+            return payment;
+        }
+        if (Math.abs(payment.getAmount() - notifiedAmount) > AMOUNT_TOLERANCE) {
+            logger.warn("Amount mismatch for payment {}: expected {}, notified {}",
+                    payment.getId(), payment.getAmount(), notifiedAmount);
+            throw new ValidationException("Notified amount does not match the payment amount");
+        }
 
         payment.setStatus(status);
-        payment.setPaid_at(new Date());
-
         if (isPaymentSuccessful(status)) {
+            payment.setPaid_at(new Date());
             enrollStudent(payment.getUser(), payment.getCourse());
         }
 
@@ -107,11 +146,12 @@ public class PaymentService {
      *
      * @param userId the ID of the user
      * @return a list of Payment entities
-     * @throws RuntimeException if the user is not found
+     * @throws ResourceNotFoundException if the user is not found
      */
     @Transactional(readOnly = true)
     public List<Payment> getUserPayments(Integer userId) {
-        Users user = findUserById(userId);
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
         return paymentRepository.findByUser(user);
     }
 
@@ -136,12 +176,6 @@ public class PaymentService {
         return paymentRepository.findAll();
     }
 
-    /**
-     * Enrolls a student in a course after successful payment.
-     *
-     * @param user the user to enroll
-     * @param course the course to enroll in
-     */
     private void enrollStudent(Users user, Course course) {
         if (!enrollmentRepository.existsByUser_IdAndCourse_Id(user.getId(), course.getId())) {
             Enrollment enrollment = new Enrollment();
@@ -150,65 +184,11 @@ public class PaymentService {
             enrollment.setEnrolled_at(new Date());
             enrollment.setProgress(0.0);
 
-            Status activeStatus = new Status();
-            activeStatus.setId(1);
-            activeStatus.setType("active");
-            enrollment.setStatus(activeStatus);
-
             enrollmentRepository.save(enrollment);
         }
     }
 
-    /**
-     * Finds or creates a payment method.
-     *
-     * @param methodName the name of the payment method
-     * @return the PaymentMethod entity
-     */
-    private PaymentMethod findOrCreatePaymentMethod(String methodName) {
-        PaymentMethod paymentMethod = paymentMethodRepository.findByMethod(methodName);
-        if (paymentMethod == null) {
-            paymentMethod = new PaymentMethod();
-            paymentMethod.setMethod(methodName);
-            paymentMethod = paymentMethodRepository.save(paymentMethod);
-        }
-        return paymentMethod;
-    }
-
-    /**
-     * Checks if a payment status indicates a successful payment.
-     *
-     * @param status the payment status
-     * @return true if the payment is successful, false otherwise
-     */
     private boolean isPaymentSuccessful(String status) {
         return "SUCCESS".equals(status) || "COMPLETED".equals(status);
     }
-
-    /**
-     * Finds a user by ID.
-     *
-     * @param userId the user ID
-     * @return the Users entity
-     * @throws RuntimeException if the user is not found
-     */
-    private Users findUserById(Integer userId) {
-        return usersRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-    }
-
-    /**
-     * Finds a course by ID.
-     *
-     * @param courseId the course ID
-     * @return the Course entity
-     * @throws RuntimeException if the course is not found
-     */
-    private Course findCourseById(Integer courseId) {
-        return courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found with ID: " + courseId));
-    }
 }
-
-
-

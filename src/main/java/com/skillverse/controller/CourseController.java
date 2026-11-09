@@ -3,6 +3,7 @@ package com.skillverse.controller;
 import com.skillverse.dto.CourseDTO;
 import com.skillverse.dto.CourseRequestDTO;
 import com.skillverse.model.Course;
+import com.skillverse.security.AccessPolicy;
 import com.skillverse.service.CourseService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,9 +28,11 @@ import java.util.List;
 @Tag(name = "Courses", description = "Course management endpoints")
 public class CourseController {
     private final CourseService courseService;
+    private final AccessPolicy accessPolicy;
 
-    public CourseController(CourseService courseService) {
+    public CourseController(CourseService courseService, AccessPolicy accessPolicy) {
         this.courseService = courseService;
+        this.accessPolicy = accessPolicy;
     }
 
     /**
@@ -39,7 +42,7 @@ public class CourseController {
      * @param size the page size (default: 10)
      * @return ResponseEntity with paginated course data (200 OK)
      */
-    @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR','ADMIN')")
     @GetMapping
     @Operation(summary = "Get all courses with pagination")
     @ApiResponse(responseCode = "200", description = "Courses retrieved successfully")
@@ -56,7 +59,7 @@ public class CourseController {
       * @param courseRequestDTO the course data to create (validated)
       * @return ResponseEntity with created course data (201 Created)
       */
-     @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR')")
+     @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
      @PostMapping
      @Operation(summary = "Create a new course")
      @ApiResponse(responseCode = "201", description = "Course created successfully")
@@ -69,6 +72,7 @@ public class CourseController {
         course.setDifficulty(courseRequestDTO.getDifficulty());
         course.setPrice(courseRequestDTO.getPrice());
         course.setThumbnail(courseRequestDTO.getThumbnail());
+        course.setUser(accessPolicy.currentUser());
         courseService.createCourse(course);
         return ResponseEntity.status(HttpStatus.CREATED).body(courseService.getCourseById(course.getId()));
     }
@@ -79,7 +83,7 @@ public class CourseController {
       * @param id the course ID
       * @return ResponseEntity with course data (200 OK) or (404 Not Found)
       */
-     @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR')")
+     @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR','ADMIN')")
      @GetMapping("/{id}")
      @Operation(summary = "Get course by ID")
      @ApiResponse(responseCode = "200", description = "Course found")

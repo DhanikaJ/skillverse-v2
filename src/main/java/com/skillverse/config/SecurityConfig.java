@@ -56,6 +56,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        // PayHere server-to-server callback: no JWT, authenticated by md5sig instead
+                        .requestMatchers(HttpMethod.POST, "/api/v1/payments/webhook/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                         .requestMatchers("/", "/hello").permitAll()
                         .anyRequest().authenticated()

@@ -6,6 +6,7 @@ import com.skillverse.model.QuizQuestion;
 import com.skillverse.repository.CourseRepository;
 import com.skillverse.repository.QuizQuestionRepository;
 import com.skillverse.repository.QuizRepository;
+import com.skillverse.security.AccessPolicy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +23,14 @@ public class QuizService {
     private final QuizQuestionRepository quizQuestionRepository;
     private final CourseRepository courseRepository;
 
-    public QuizService(QuizRepository quizRepository, QuizQuestionRepository quizQuestionRepository, CourseRepository courseRepository) {
+    private final AccessPolicy accessPolicy;
+
+    public QuizService(QuizRepository quizRepository, QuizQuestionRepository quizQuestionRepository,
+                       CourseRepository courseRepository, AccessPolicy accessPolicy) {
         this.quizRepository = quizRepository;
         this.quizQuestionRepository = quizQuestionRepository;
         this.courseRepository = courseRepository;
+        this.accessPolicy = accessPolicy;
     }
 
     /**
@@ -40,6 +45,7 @@ public class QuizService {
     public Quiz createQuiz(Integer courseId, String title) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalStateException("Course not found with ID: " + courseId));
+        accessPolicy.requireCourseManager(course);
 
         Quiz quiz = new Quiz();
         quiz.setCourse(course);
@@ -57,8 +63,9 @@ public class QuizService {
      */
     @Transactional(readOnly = true)
     public List<QuizQuestion> getQuestionsByQuizId(Integer quizId) {
-        quizRepository.findById(quizId)
+        Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new IllegalStateException("Quiz not found with ID: " + quizId));
+        accessPolicy.requireCourseAccess(quiz.getCourse());
 
         return quizQuestionRepository.findByQuiz_IdOrderByIdAsc(quizId);
     }
