@@ -1,5 +1,7 @@
 package com.skillverse.config;
 
+import com.skillverse.demo.DemoProperties;
+import com.skillverse.demo.DemoReadOnlyFilter;
 import com.skillverse.security.JwtAuthFilter;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +27,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final ObjectProvider<JwtAuthFilter> jwtAuthFilterProvider;
+    private final DemoProperties demoProperties;
 
-    public SecurityConfig(ObjectProvider<JwtAuthFilter> jwtAuthFilterProvider) {
+    public SecurityConfig(ObjectProvider<JwtAuthFilter> jwtAuthFilterProvider, DemoProperties demoProperties) {
         this.jwtAuthFilterProvider = jwtAuthFilterProvider;
+        this.demoProperties = demoProperties;
     }
 
     /**
@@ -62,7 +66,9 @@ public class SecurityConfig {
                         .requestMatchers("/", "/hello").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilterProvider.getObject(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilterProvider.getObject(), UsernamePasswordAuthenticationFilter.class)
+                // keeps the public demo administrator read-only (no-op unless demo mode is on)
+                .addFilterAfter(new DemoReadOnlyFilter(demoProperties), JwtAuthFilter.class);
 
         return http.build();
     }

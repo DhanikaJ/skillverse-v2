@@ -1,5 +1,6 @@
 package com.skillverse.security;
 
+import com.skillverse.demo.DemoProperties;
 import com.skillverse.model.Course;
 import com.skillverse.model.Role;
 import com.skillverse.model.Users;
@@ -24,10 +25,13 @@ public class AccessPolicy {
 
     private final UsersRepository usersRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final DemoProperties demoProperties;
 
-    public AccessPolicy(UsersRepository usersRepository, EnrollmentRepository enrollmentRepository) {
+    public AccessPolicy(UsersRepository usersRepository, EnrollmentRepository enrollmentRepository,
+                        DemoProperties demoProperties) {
         this.usersRepository = usersRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.demoProperties = demoProperties;
     }
 
     /**
@@ -48,6 +52,16 @@ public class AccessPolicy {
 
     public boolean isAdmin(Users user) {
         return user.getRole() == Role.ADMIN;
+    }
+
+    /**
+     * Rejects the public demo accounts. Their password is public, so they must not trigger
+     * actions that cost money or store arbitrary content (such as file uploads).
+     */
+    public void requireNotDemoAccount() {
+        if (demoProperties.isDemoAccount(currentUser().getEmail())) {
+            throw new AccessDeniedException("This action is disabled for demo accounts");
+        }
     }
 
     /** Allows only administrators. */

@@ -135,7 +135,7 @@ public class DataSeeder implements CommandLineRunner {
         course.setPricelevel(difficulty); // pricelevel mirrors difficulty for seed data
         course.setUser(instructor);
         course.setCreated_at(new Date());
-        course.setThumbnail("https://via.placeholder.com/300?text=" + title.replace(" ", "+"));
+        course.setThumbnail("https://placehold.co/600x400?text=" + title.replace(" ", "+"));
         
         Course savedCourse = courseRepository.save(course);
         logger.info("Seeded course: {}", title);

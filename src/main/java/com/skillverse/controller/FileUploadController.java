@@ -1,5 +1,6 @@
 package com.skillverse.controller;
 
+import com.skillverse.security.AccessPolicy;
 import com.skillverse.service.FileUploadService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -20,9 +21,11 @@ public class FileUploadController {
     private static final Logger logger = LoggerFactory.getLogger(FileUploadController.class);
 
     private final FileUploadService fileUploadService;
+    private final AccessPolicy accessPolicy;
 
-    public FileUploadController(FileUploadService fileUploadService) {
+    public FileUploadController(FileUploadService fileUploadService, AccessPolicy accessPolicy) {
         this.fileUploadService = fileUploadService;
+        this.accessPolicy = accessPolicy;
     }
 
     /**
@@ -31,6 +34,7 @@ public class FileUploadController {
     @PreAuthorize("hasAnyRole('INSTRUCTOR','ADMIN')")
     @PostMapping("/upload")
     public ResponseEntity<UploadResponse> uploadFile(@RequestParam("file") MultipartFile file) {
+        accessPolicy.requireNotDemoAccount();
         try {
             String url = fileUploadService.uploadFile(file);
             return ResponseEntity.ok(new UploadResponse(true, "File uploaded successfully", url));
