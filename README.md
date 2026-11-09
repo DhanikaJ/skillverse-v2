@@ -319,6 +319,27 @@ Because the password is public, demo accounts are limited: the demo administrato
 DEMO_MODE=true SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
 ```
 
+#### Self-contained demo deployment (free hosting)
+
+The `demo` profile needs no database, JWT secret or Cloudinary account, so it runs on any free container host. Everything is seeded in memory at start-up and resets on restart, which suits a showcase.
+
+```bash
+SPRING_PROFILES_ACTIVE=demo ./mvnw spring-boot:run
+
+# or with Docker (the image defaults to the demo profile)
+docker build -t skillverse-demo .
+docker run -p 8080:8080 -e CORS_ALLOWED_ORIGINS=https://your-ui.example skillverse-demo
+```
+
+| Variable | Needed | Purpose |
+|---|---|---|
+| `CORS_ALLOWED_ORIGINS` | yes | Origin(s) of the deployed UI, comma-separated, no trailing slash |
+| `JWT_SECRET` | no | Keeps tokens valid across restarts; a random key is used if unset |
+| `DEMO_PASSWORD` | no | Shared demo password (default `Demo@2026`) |
+| `PORT` | set by the host | HTTP port |
+
+`render.yaml` is a ready-made [Render](https://render.com) blueprint (free plan). Free services sleep when idle, so the first request after a quiet period can take up to a minute; the login page shows a "connecting" notice and retries automatically. The process uses roughly 300 MB, which fits a 512 MB free tier. Point the UI's `VITE_API_BASE_URL` at `https://<host>/api/v1` and redeploy it, since Vite bakes the value in at build time.
+
 ### Connect the frontend
 
 In `skillverse-ui`, set:
@@ -367,6 +388,7 @@ openssl rand -base64 48
 | `dev` | PostgreSQL | on | SQL logging, development defaults |
 | `test` | H2 in-memory | on | `create-drop` schema |
 | `prod` | PostgreSQL via `PG*` | off | Quiet logging, JDBC batching |
+| `demo` | H2 in-memory | off | Self-contained showcase: demo mode always on, data re-seeded and reset on every start, no external services |
 
 > **CORS:** allowed origins are currently defined in `config/CorsConfig.java` (`/api/v1/**`). Add your local UI origin there for development. Binding this to `CORS_ALLOWED_ORIGINS` is on the roadmap.
 
@@ -448,6 +470,7 @@ Tests run against the `test` profile (in-memory H2) with the seeded accounts and
 |---|---|
 | `SecurityHardeningIntegrationTest` | Role and ownership rules, server-side pricing, lesson access, PayHere notification handling (invalid signature, wrong amount, success, duplicate/downgrade) |
 | `DemoModeIntegrationTest` | Published demo credentials, seeded showcase data, read-only demo administrator, upload block, idempotent seeding |
+| `DemoProfileSmokeTest` | The `demo` profile boots with no environment variables, serves working demo accounts, and returns 4xx rather than 500 for client mistakes |
 | `DemoControllerTest` | Nothing is published while demo mode is off |
 | `PayHereSignatureServiceTest` | `md5sig` verification and fail-closed behaviour |
 | `EnrollmentPaymentRuleTest` | Payment-required enrollment rule; seeder restricted to `dev`/`test` |
@@ -479,9 +502,11 @@ skillverse-v2/
 │   └── service/                       # business logic
 ├── src/main/resources/
 │   ├── application.properties         # base configuration
-│   └── application-{dev,test,prod}.properties
+│   └── application-{dev,test,prod,demo}.properties
 ├── src/test/                          # tests
 ├── docs/                              # screenshots and project documents
+├── Dockerfile                         # self-contained demo image (demo profile)
+├── render.yaml                        # Render blueprint for the demo API
 ├── docker-compose.yml                 # local PostgreSQL
 ├── .env.example                       # environment template
 └── pom.xml
